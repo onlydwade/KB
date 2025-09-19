@@ -1,0 +1,129 @@
+# Spring
+server:
+  port: 8203
+spring:
+  application:
+    # 应用名称
+    name: bytefinger-biz
+  profiles:
+    # 环境配置
+    active: local
+
+---
+# local
+spring:
+  cloud:
+    nacos:
+      discovery:
+        # 服务注册地址
+        server-addr: 127.0.0.1:8848
+        namespace: bytefinger-audit-local
+      config:
+        # 配置中心地址
+        server-addr: 127.0.0.1:8848
+        #命名空间
+        namespace: bytefinger-audit-local
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        group: bytefinger-audit-local
+        shared-configs:
+          - application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+  config:
+    activate:
+      on-profile: local
+---
+# dev
+spring:
+  cloud:
+    nacos:
+      discovery:
+        # 服务注册地址
+        server-addr: nacos:8848
+        namespace: bytefinger-audit-dev
+      config:
+        # 配置中心地址
+        server-addr: nacos:8848
+        namespace: bytefinger-audit-dev
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        group: bytefinger-audit-dev
+        shared-configs:
+          - data-id: application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+            group: bytefinger-audit-dev
+  config:
+    activate:
+      on-profile: dev
+---
+# sit
+spring:
+  cloud:
+    nacos:
+      discovery:
+        # 服务注册地址
+        server-addr: tt-sit-nacos-headless:8848
+        namespace: 827a20f0-2292-4234-8972-5d68c68fc03c
+      config:
+        # 配置中心地址
+        server-addr: tt-sit-nacos-headless:8848
+        namespace: 827a20f0-2292-4234-8972-5d68c68fc03c
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        group: DEFAULT_GROUP
+        shared-configs:
+          - data-id: application.${spring.cloud.nacos.config.file-extension}
+            group: DEFAULT_GROUP
+  config:
+    activate:
+      on-profile: sit
+---
+# uat
+spring:
+  cloud:
+    nacos:
+      discovery:
+        # 服务注册地址
+        server-addr: 192.168.231.160:8848
+        namespace: 9aed162f-0031-4897-9176-448767fd0855
+      config:
+        # 配置中心地址
+        server-addr: 192.168.231.160:8848
+        namespace: 9aed162f-0031-4897-9176-448767fd0855
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        group: DEFAULT_GROUP
+        shared-configs:
+          - data-id: application.${spring.cloud.nacos.config.file-extension}
+            group: DEFAULT_GROUP
+  config:
+    activate:
+      on-profile: uat
+
+
+---
+# prod
+spring:
+  cloud:
+    nacos:
+      discovery:
+        # 服务注册地址
+        server-addr: tt-nacos-headless-svc1:8848
+        namespace: 1443d77c-13c8-405b-bc2e-805433199f43
+      config:
+        # 配置中心地址
+        server-addr: tt-nacos-headless-svc1:8848
+        namespace: 1443d77c-13c8-405b-bc2e-805433199f43
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        group: DEFAULT_GROUP
+        shared-configs:
+          - data-id: application.${spring.cloud.nacos.config.file-extension}
+            group: DEFAULT_GROUP
+
+  config:
+    activate:
+      on-profile: prod

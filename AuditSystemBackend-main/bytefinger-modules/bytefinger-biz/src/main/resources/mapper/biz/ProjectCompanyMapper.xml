@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytefinger.toutuo.biz.projectcompany.mapper.ProjectCompanyMapper">
+
+    <sql id="selectBaseData">
+      select  company.* from  ( SELECT
+        DISTINCT cp.*,project.attributor_user_id as attributor_user_id,project.project_name as project_name,
+        (select IFNULL(sum(p.amount),0) from biz_project_company_payment p where p.company_id = cp.id) as paidCapital
+        FROM
+        biz_project_company cp,
+         biz_project project
+        where  cp.project_id = project.id and project.service_status='ZAI_GUAN' and project.expire= 'YOU_XIAO'
+        <if test="cm.attributorUserId != null">
+            and project.attributor_user_id = ${cm.attributorUserId}
+        </if>
+        <if test="cm.principalId != null">
+            and project.principal_id = ${principalId}
+        </if>
+        <if test="cm.projectName != null">
+            and project.project_name = ${projectName}
+        </if>
+        <if test="cm.paidCapitalStatus != null and cm.paidCapitalStatus == 'SHI' ">
+            and (select IFNULL(sum(p.amount),0) from biz_project_company_payment p where p.company_id = cp.id) > 0
+        </if>
+        <if test="cm.paidCapitalStatus != null and cm.paidCapitalStatus == 'FOU' ">
+            and (select IFNULL(sum(p.amount),0) from biz_project_company_payment p where p.company_id = cp.id) = 0
+        </if>
+        <choose>
+            <!--  所在部门及下级部门+员工   -->
+            <when test="'SHOW_SUB' == cm.dataRole">
+                <!-- 我部门下的数据 -->
+                and (
+                project.company_id IN
+                <foreach collection="cm.deptIds" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                OR project.id IN ( SELECT bpu.record_id FROM biz_project_team bpu WHERE bpu.user_id = #{cm.userId})
+                OR project.attributor_user_id = #{cm.userId}
+                OR project.create_user_id = #{cm.userId}
+                OR cp.principal_id=#{cm.userId}
+                )
+            </when>
+            <!-- 全部数据 -->
+            <when test="'SHOW_ALL' == cm.dataRole">
+
+            </when>
+            <!-- 默认本人数据 -->
+            <otherwise>
+                AND (
+                project.attributor_user_id = #{cm.userId}
+                OR project.id IN ( SELECT bpu.record_id FROM biz_project_team bpu WHERE bpu.user_id = #{cm.userId})
+                OR project.create_user_id = #{cm.userId}
+                OR cp.principal_id=#{cm.userId}
+                )
+            </otherwise>
+        </choose>
+
+        ) company where 1=1
+    </sql>
+
+    <!-- 公司列表 -->
+    <select id="list" resultType="com.bytefinger.toutuo.biz.projectcompany.domain.ProjectCompany">
+        <include refid="selectBaseData"></include>
+        <if test="ew.sqlSegment != '' ">
+            AND ${ew.sqlSegment}
+        </if>
+        <!--        AND company.principal_id is not null-->
+        <!--        <if test="paidCapitalStatus != null and paidCapitalStatus == 1 ">-->
+<!--           AND company.paidCapital>0-->
+<!--        </if>-->
+
+<!--        <if test="paidCapitalStatus != null and paidCapitalStatus == 0 ">-->
+<!--           AND company.paidCapital &lt; 0-->
+<!--        </if>-->
+
+
+    </select>
+
+    <!-- 详情 -->
+    <select id="getByCompanyId" resultType="com.bytefinger.toutuo.biz.projectcompany.domain.ProjectCompany">
+        SELECT
+            DISTINCT company.*,project.attributor_user_id as attributorUserId,project.project_name as projectName,project.principal_id as principalId,
+            (select IFNULL(sum(p.amount),0) from biz_project_company_payment p where p.company_id = company.id) as paidCapital
+        FROM
+            biz_project_company company
+                left join biz_project project on company.project_id = project.id
+        where 1=1 and company.id = #{id}
+    </select>
+
+</mapper>

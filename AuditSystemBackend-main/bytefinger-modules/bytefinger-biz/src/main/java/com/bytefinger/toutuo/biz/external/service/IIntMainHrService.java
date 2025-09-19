@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.external.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.biz.external.domain.IntMainHr;/** * <p> * 主数据岗位表 服务类 * </p> * * @author Jone * @since 2023-03-02 */public interface IIntMainHrService extends IService<IntMainHr> {}

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytefinger.toutuo.biz.project.mapper.ProjectBacklogMapper">
+
+    <sql id="selectBaseData">
+        select * from biz_project_backlog where 1 = 1
+    </sql>
+
+    <select id="list" resultType="com.bytefinger.toutuo.biz.project.domain.ProjectBacklog">
+        <include refid="selectBaseData"></include>
+        <if test="ew.sqlSegment != '' ">
+            AND ${ew.sqlSegment}
+        </if>
+    </select>
+
+    <select id="getGroupConfig" resultType="java.lang.Integer">
+        select config_value from sys_config where config_key = 'BACKLOG_CONFIG'
+    </select>
+
+    <select id="setGroupConfig">
+        update sys_config set config_value =#{configValue} where config_key = 'BACKLOG_CONFIG'
+    </select>
+
+    <select id="getUserRoleCodes" resultType="java.lang.String">
+        select tabc.post_code from sys_user taba
+        inner join sys_user_dept_post tabb on taba.user_id =  tabb.user_id
+        inner join sys_post tabc on tabb.post_id = tabc.post_id
+        where taba.user_id = #{userId}
+    </select>
+
+    <select id="getPostCode" resultType="java.lang.String">
+        select taba.post_code from sys_post taba
+        where taba.post_id = #{postId}
+    </select>
+
+</mapper>

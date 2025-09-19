@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bytefinger.toutuo.biz.workbrief.mapper.GroupInfoMapper">
+
+    <select id="list" resultType="com.bytefinger.toutuo.biz.workbrief.domain.GroupInfo">
+        SELECT
+        DISTINCT groupInfo.*
+        FROM
+        biz_group_info groupInfo where 1 = 1
+        <if test="ew.sqlSegment != '' ">
+            AND ${ew.sqlSegment}
+        </if>
+    </select>
+
+    <select id="groupUserList" resultType="com.bytefinger.toutuo.biz.workbrief.dto.GroupUserDto">
+        SELECT
+            tab_a.group_id groupId,
+            tab_a.user_id userId,
+            tab_b.realname
+        FROM
+        `biz_group_user` tab_a
+        inner join sys_user tab_b on tab_a.user_id = tab_b.user_id where 1= 1
+
+        <if test="ids != null and ids.size>0" >
+           and tab_a.group_id in
+            <foreach collection="ids" index="index" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+    </select>
+
+</mapper>

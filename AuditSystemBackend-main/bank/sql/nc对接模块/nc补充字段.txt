@@ -1,0 +1,3 @@
+#漏掉的字段
+update biz_project_company_finance_excel_field_match set excel_title='其中:利息费用去年同期本年累计' where id = 10993;
+ALTER TABLE biz_project_company_finance_sync_data ADD finance_id bigint DEFAULT NULL COMMENT '财务数据id';

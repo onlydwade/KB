@@ -1,0 +1,25 @@
+################
+#1.在bytefinger-gateway.yml文件里，添加配置下载附件接口的白名单
+################
+security:
+  # 不校验白名单
+  ignore:
+    whites:
+      - /system/download3
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+	  
+################
+#2.在bytefinger-biz.yml文件里，添加配置下载域名配置
+#sit配置为  host: https://tt-sit.gem-flower.com
+#uat配置为  host: https://tt-uat.gem-flower.com
+#uat配置为  host: https://tt-pro.gem-flower.com
+################	  
+#下载地址域名
+downLoad:
+  host: https://tt-sit.gem-flower.com

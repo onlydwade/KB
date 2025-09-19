@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytefinger.toutuo.biz.companyappraise.mapper.ProjectCompanyAppraiseReportMapper">
+
+    <sql id="selectBaseData">
+        SELECT
+            DISTINCT report.*,company.name as companyName, company.company_biz_no as companyBizNo, company.company_no as companyNo
+        FROM
+        biz_project_company_appraise_report report,
+        biz_project_company company ,
+        biz_project project
+        where company.id = report.company_id and company.project_id=project.id and project.service_status='ZAI_GUAN' and project.expire= 'YOU_XIAO'
+        <if test="cm.companyName != null">
+            and company.name  like  '%${cm.companyName}%'
+        </if>
+        <choose>
+            <!--  所在部门及下级部门+员工   -->
+            <when test="'SHOW_SUB' == cm.dataRole">
+                <!-- 我部门下的数据 -->
+                and (
+                project.company_id IN
+                <foreach collection="cm.deptIds" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                OR project.id IN ( SELECT bpu.record_id FROM biz_project_team bpu WHERE bpu.user_id = #{cm.userId})
+                OR project.attributor_user_id = #{cm.userId}
+                OR project.create_user_id = #{cm.userId}
+                OR company.principal_id=#{cm.userId}
+                )
+            </when>
+
+            <!-- 全部数据 -->
+            <when test="'SHOW_ALL' == cm.dataRole">
+
+            </when>
+
+            <!-- 默认本人数据 -->
+            <otherwise>
+                AND (
+                project.attributor_user_id = #{cm.userId}
+                OR project.id IN ( SELECT bpu.record_id FROM biz_project_team bpu WHERE bpu.user_id = #{cm.userId})
+                OR project.create_user_id = #{cm.userId}
+                OR company.principal_id=#{cm.userId}
+                )
+            </otherwise>
+        </choose>
+
+    </sql>
+
+    <!-- 公司列表 -->
+    <select id="list" resultType="com.bytefinger.toutuo.biz.companyappraise.domain.ProjectCompanyAppraiseReport">
+        <include refid="selectBaseData"></include>
+        <if test="ew.sqlSegment != '' ">
+            AND ${ew.sqlSegment}
+        </if>
+    </select>
+
+
+    <!-- 详情 -->
+    <select id="getById" resultType="com.bytefinger.toutuo.biz.companyappraise.domain.ProjectCompanyAppraiseReport">
+        SELECT
+            DISTINCT report.*,company.name as companyName, company.company_biz_no as companyBizNo, company.company_no as companyNo
+        FROM
+            biz_project_company_appraise_report report
+                left join biz_project_company company on company.id = report.company_id
+        where 1=1 and report.id = #{id}
+    </select>
+
+</mapper>

@@ -1,0 +1,1 @@
+alter table biz_project_check Add column temporary int(1) COMMENT '是否暂存（0是）';

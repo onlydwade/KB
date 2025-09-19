@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.project.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.biz.project.domain.ProjectRecodingBak;/** * <p> * 项目管理删除备份表 服务类 * </p> * * @author Jone * @since 2024-09-13 */public interface IProjectRecodingBakService extends IService<ProjectRecodingBak> {}

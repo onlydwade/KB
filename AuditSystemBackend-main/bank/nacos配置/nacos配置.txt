@@ -1,0 +1,43 @@
+bytefinger-toutuo-sit：
+
+bytefinger-biz.yml
+user:
+  deptName: 运营管理部
+
+
+
+
+
+Toutuo-Integration-sit：
+
+application.yml
+
+oaWebService:
+  reviewnew:
+    wsdl: http://oatest.gem-flawer.com/sys/webservice/kmReviewNewWebserviceService?wsdl
+
+ncTask:
+   scheduled:
+    cron: "0 0 */1 * * ?"
+
+oss:
+  accessKeyId: LTAI5tDanVibkT4mt6NWTEMY
+  accessKeySecret: 5IGOCY47q5dmtYrLaBTD34l4EsErID
+  endpoint: oss-cn-beijing.aliyuncs.com
+  bucketName: bsh-toutuo-oss
+  url: https://bsh-toutuo-oss.oss-cn-beijing.aliyuncs.com/
+  prefix: dev/integration
+
+nc:
+  api:
+    tokenUrl: http://39.96.244.220:63390/uapws/rest/user/login
+    reportdataUrl: http://39.96.244.220:63390/uapws/rest/iufo/data/query
+    usercode: xulin
+    pwd: 123qwe
+    uap_dataSource: nc20221026
+    assets: 10011
+    profit: 10021
+    cashflow: 10031
+    assetsExcelTemplatePath: dev/integration/资产负债表.xls
+    profitExcelTemplatePath: dev/integration/利润表.xls
+    cashflowExcelTemplatePath: dev/integration/现金流量表.xls

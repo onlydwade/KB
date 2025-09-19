@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.item.service;import com.bytefinger.toutuo.biz.audititem.domain.AuditItem;import com.bytefinger.toutuo.biz.item.domain.Item;import com.baomidou.mybatisplus.extension.service.IService;/** * <p> * 审计项目 服务类 * </p> * * @author Jone * @since 2025-08-05 */public interface IItemService extends IService<Item> {    void add(Item item);}

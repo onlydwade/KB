@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytefinger.toutuo.biz.workbrief.mapper.RecentProjectUndertakingMapper">
+
+    <update id="deleteByBriefId">
+        update biz_recent_project_undertaking set deleted = 2,update_time = NOW() where deleted = 0 and brief_id = #{briefId}
+    </update>
+
+    <select id="getListByBriefId" resultType="com.bytefinger.toutuo.biz.workbrief.domain.RecentProjectUndertaking">
+        SELECT un.* FROM biz_recent_project_undertaking un WHERE un.brief_id = #{briefId} AND deleted = 0
+    </select>
+
+    <select id="getList" resultType="com.bytefinger.toutuo.biz.workbrief.domain.RecentProjectUndertaking">
+        select pro.id AS projectId,pro.project_name AS projectName,dept.dept_id AS deptId,dept.dept_name AS deptName,IFNULL(pro.contract_amount / 10000, 0) AS contractAmount,IFNULL(pro.contract_annual_amount / 10000, 0) AS contractAnnualAmount
+        ,pro.expect_service_years 'year' from biz_project_step ps
+        JOIN biz_project pro ON ps.project_id = pro.id
+        JOIN sys_dept dept ON dept.dept_id = pro.company_id AND dept.del_flag = 0
+        WHERE ps.`status` = 1 AND ps.step_menu_id = 18
+        AND ps.handle_time &gt;= #{startTime} AND ps.handle_time &lt;= #{endTime}
+        <if test="companyIds != null and companyIds.size > 0 ">
+            AND pro.company_id in
+            <foreach collection="companyIds" item="companyId" open="(" close=")" separator=",">
+                #{companyId}
+            </foreach>
+        </if>
+
+        <choose>
+            <!--  所在部门及下级部门+员工   -->
+            <when test="'SHOW_SUB' == cm.dataRole">
+                <!-- 我部门下的数据 -->
+                and (
+                pro.company_id IN
+                <foreach collection="cm.deptIds" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                OR pro.id IN ( SELECT bpu.record_id FROM biz_project_team bpu WHERE bpu.user_id = #{cm.userId})
+                OR pro.attributor_user_id = #{cm.userId}
+                OR pro.create_user_id = #{cm.userId}
+                )
+            </when>
+
+            <!-- 全部数据 -->
+            <when test="'SHOW_ALL' == cm.dataRole">
+
+            </when>
+
+            <!-- 默认本人数据 -->
+            <otherwise>
+                AND (
+                pro.attributor_user_id = #{cm.userId}
+                OR pro.id IN ( SELECT bpu.record_id FROM biz_project_team bpu WHERE bpu.user_id = #{cm.userId})
+                OR pro.create_user_id = #{cm.userId}
+                )
+            </otherwise>
+        </choose>
+    </select>
+
+</mapper>

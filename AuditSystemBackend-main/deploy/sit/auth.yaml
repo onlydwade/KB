@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tt-sit-backend-auth
+  namespace: tt-sit
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: tt-sit-backend-auth
+    spec:
+      containers:
+      - name: tt-sit-backend-auth
+        image: 10.0.1.135:8080/toutuo/tt_sit_backend_auth:latest
+        ports:
+        - containerPort: 8201
+      imagePullSecrets:
+      - name: tt-sit-harbor
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: tt-sit-backend-auth

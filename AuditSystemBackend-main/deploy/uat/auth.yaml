@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tt-uat-backend-auth
+  namespace: tt-uat
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: tt-uat-backend-auth
+    spec:
+      containers:
+      - name: tt-uat-backend-auth
+        image: 10.0.1.135:8080/toutuo/tt_uat_backend_auth:latest
+        ports:
+        - containerPort: 8201
+      imagePullSecrets:
+      - name: tt-uat-harbor
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: tt-uat-backend-auth

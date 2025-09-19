@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.project.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.biz.project.domain.ProjectContract;/** * <p> * 项目合同信息 服务类 * </p> * * @author Jone * @since 2023-01-31 */public interface IProjectContractService extends IService<ProjectContract> {}

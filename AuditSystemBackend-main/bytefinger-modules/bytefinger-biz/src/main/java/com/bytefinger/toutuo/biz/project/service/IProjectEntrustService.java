@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.project.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.biz.project.domain.ProjectEntrust;/** * <p> * 项目委托 服务类 * </p> * * @author Jone * @since 2023-01-31 */public interface IProjectEntrustService extends IService<ProjectEntrust> {}

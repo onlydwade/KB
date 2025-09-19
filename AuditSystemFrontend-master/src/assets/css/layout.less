@@ -1,0 +1,305 @@
+html{height: 100%;vertical-align: baseline;font-size: 100%;}
+html,body,ul,ol,li,h1,h2,h3,h4,h5,h6,p{padding:0;margin:0;border:0;list-style-type: none;}
+body{
+    height           : 100%;
+    font-size        : 14px;
+    background-color : #f0f2f5;
+    font-family      : "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+    
+    input[type=number] {
+        -moz-appearance : textfield;
+        line-height     : inherit!important;
+    }
+    input[type=number]::-webkit-inner-spin-button,
+    input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    h1, h2, h3, h4, h5, h6,p{
+        margin-bottom: 0;
+    }
+}
+@page{
+    margin:0.25cm;
+}
+
+::-webkit-scrollbar {
+  width            : 8px;
+  height           : 8px;
+  background-color : #ffffff;
+}
+
+::-webkit-scrollbar-button {
+  width  : 4px;
+  height : 4px;
+}
+
+::-webkit-scrollbar-button:start:decrement,
+::-webkit-scrollbar-button:end:increment {
+  display: block;
+}
+
+::-webkit-scrollbar-button:vertical:start:increment,
+::-webkit-scrollbar-button:vertical:end:decrement {
+  display: none;
+}
+
+::-webkit-scrollbar-corner {
+  display: block;
+}
+
+::-webkit-scrollbar-track-piece:vertical {
+  background-color: #fff;
+}
+
+::-webkit-scrollbar-track-piece:horizontal {
+  background-color: #fff;
+}
+
+::-webkit-scrollbar-track-piece {
+  background-color: #fff;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #cdcdcd;
+  cursor: pointer;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
+}
+
+::-webkit-scrollbar-track:vertical,
+::-webkit-scrollbar-thumb:vertical {
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track:horizontal,
+::-webkit-scrollbar-thumb:horizontal {
+  border-radius: 4px;
+
+}
+
+
+#tp-watermark div:nth-child(2n){
+	padding-left: 200px;
+}
+#crl{
+    #app{
+        height           : 100%;
+        background-color : #f0f2f5;
+        overflow-y: auto;
+    }
+    color            : @text-color;
+    .clear{clear:both;}
+    .clearfix:after{content:"";display:block;clear:both;}
+    .clearfix{zoom:1;}
+    .fl{
+        float: left;
+    }
+    .fr{
+        float: right;
+    }
+    .fn{
+        float: none;
+    }
+    .text-left{
+        text-align: left!important;
+    }
+    .text-center{
+        text-align: center!important;
+    }
+    .text-right{
+        text-align: right!important;
+    }
+    .color-gray{
+        color: @disabled-color!important;
+    }
+    .color-text{
+        color : @text-color!important;
+    }
+    .color-info{
+        color : @text-color-secondary!important;
+    }
+    .color-primary{
+        color : @primary-color!important;
+    }
+    .color-success{
+        color : @success-color!important;
+    }
+    .color-warning{
+        color : @warning-color!important;
+    }
+    .color-danger{
+        color : @error-color!important;
+    }
+    .color-link{
+        color : @link-color!important;
+        cursor: pointer;
+        &:hover{
+            opacity: 0.8;
+        }
+    }
+    a:active,a:focus,button:active,button:focus,input:active,input:focus,textarea:active,textarea:focus,select:active,select:focus,*:active,*:focus{outline:none;-webkit-outline:none;-webkit-tap-highlight-color:transparent}
+    
+    .flex_box{
+        display     : flex;
+        align-items : center;
+    }
+    .flex_box_column{
+        display        : flex;
+        flex-direction : column;
+    }
+    .flex_full{
+        flex : 1;
+    }
+    .w_full{
+        width      : 100%;
+        box-sizing : border-box;
+    }
+    .text_no_warp{
+        white-space   : nowrap;
+        overflow      : hidden;
+        text-overflow : ellipsis;
+    }
+    .padding_box{
+        padding : @base-size;
+    }
+    .content-inner{
+        padding        : 16px;
+        display        : flex;
+        flex-direction : column;
+        &>.footer_bar{
+            margin : 0 -16px -16px -16px;
+        }
+    }
+    .content-box{
+        background-color : #fff;
+        border-radius    : @border-radius-base;
+        flex             : 1;
+    }
+    .content-box_full{
+        background-color : #fff;
+        border-radius    : @border-radius-base;
+        flex             : 1;
+        height           : 0;
+        display          : flex;
+        flex-direction   : column;
+    }
+    .flex_box{
+        display     : flex;
+        align-items : center;
+    }
+    .flex_box_column{
+        display        : flex;
+        flex-direction : column;
+    }
+    //ant 样式覆盖
+    .ant-menu-inline .ant-menu-item, .ant-menu-inline .ant-menu-submenu-title{
+        width: 100%;
+    }
+    
+    .ant-table-middle{
+        .ant-table-thead > tr > th{
+            height      : 48px;
+            line-height : 20px;
+            padding     : 0 8px;
+        }
+    }
+    .ant-modal-title{
+        padding-right: 16px;
+    }
+    .ant-modal-body{
+        padding: 16px;
+    }
+    .ant-page-header{
+        padding        : 16px;
+        padding-bottom : 8px;
+        margin         : -16px;
+        margin-bottom  : 16px;
+        z-index        : 10;
+        .ant-page-header-footer{
+            margin-top: 8px;
+        }
+    }
+    .ant-table-container{
+        .ant-form-item{
+            margin-bottom: 0;
+        }
+        .ant-form-item-explain{
+            height     : 8px;
+            min-height : 0;
+        }
+        .ant-form-item-has-error{
+            margin-top: -8px;
+        }
+    }
+    .ant-form-item .ant-input-textarea-show-count::after{
+        margin-bottom: 0;
+    }
+    .ant-select-tree .ant-select-tree-treenode-disabled .ant-select-tree-node-content-wrapper{
+        color: rgba(0,0,0,0.5);
+    }
+    .ant-tree .ant-tree-treenode-disabled .ant-tree-node-content-wrapper{
+        color: rgba(0,0,0,0.5);
+    }
+    .ant-spin{
+        min-height: 80px;
+    }
+    .crl-collapse{
+        background-color: transparent;
+        .ant-collapse-item{
+            margin-bottom    : 16px;
+            background-color : #fff;
+            border-radius    : 4px;
+            .ant-collapse-header{
+                padding-top    : 24px;
+                padding-bottom : 24px;
+            }
+            .ant-collapse-content{
+                border-top  : 1px solid @border-color-base;
+                padding-top : 16px;
+            }
+        }
+    }
+    .ant-table-summary{
+        td,th{
+            background-color: #fffaf0;
+        }
+    }
+    
+    .ant-popconfirm{
+        z-index: 1001;
+    }
+    //搜索筛选更多
+    .more_col{
+        display: none;
+    }
+    .show_more_col{
+        .more_col{
+            display: block;
+        }
+        .unmore_col,.key_input{
+            display: none;
+        }
+    }
+    .upload-disabled {
+        background-color: #ececec;
+        border: 0;
+    }
+    
+    .form_item_extra{
+        font-size : 10px;
+        height    : 0;
+        position  : relative;
+        bottom    : -16px;
+        color     : @text-color-secondary;
+    }
+    .ant-form-item-control-input{
+        &:last-child{
+            .form_item_extra{
+                bottom    : 0;
+            }
+        }
+    }
+}

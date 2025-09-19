@@ -1,0 +1,90 @@
+# spring配置
+spring:
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: 
+    timeout: 60000
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
+    virtual-host: my_vhost
+  cloud:
+    function:
+      definition: sysMessage;oaMessage
+    stream:
+        bindings:
+            sysMessage-in-0:
+              content-type: application/json
+              destination: sysMessage-topic
+              group: sysMessage
+            oaMessage-in-0:
+              content-type: application/json
+              destination: oaMessage-topic
+              group: oaMessage
+  datasource:
+    druid:
+      stat-view-servlet:
+        enabled: true
+        loginUsername: admin
+        loginPassword: 123456
+    dynamic:
+      druid:
+        initial-size: 5
+        min-idle: 5
+        maxActive: 20
+        maxWait: 60000
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: SELECT 1 FROM DUAL
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        maxPoolPreparedStatementPerConnectionSize: 20
+        filters: stat,slf4j
+        connectionProperties: druid.stat.mergeSql\=true;druid.stat.slowSqlMillis\=5000
+      datasource:
+          # 主库数据源
+          master:
+            driver-class-name: com.mysql.cj.jdbc.Driver
+            url: jdbc:mysql://20.222.106.88:8000/bytefinger-toutuo?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+            username: root
+            password: IA9rt7N2PcvUaQVY
+          # 从库数据源
+          # slave:
+            # username:
+            # password:
+            # url:
+            # driver-class-name:
+
+# mybatis配置
+mybatis:
+    # 搜索指定包别名
+    typeAliasesPackage: com.bytefinger.toutuo.board
+    # 配置mapper的扫描，找到所有的mapper.xml映射文件
+    mapperLocations: classpath:mapper/**/*.xml
+
+# # mybatis配置
+# mybatis-plus:
+#   configuration:
+#     map-underscore-to-camel-case: true
+#     auto-mapping-behavior: full
+#     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+#     default-enum-type-handler: org.apache.ibatis.type.EnumOrdinalTypeHandler
+#   mapperLocations: classpath*:mapper/**/*Mapper.xml
+
+# swagger配置
+swagger:
+  title: 报表模块接口文档
+  license:
+  licenseUrl:

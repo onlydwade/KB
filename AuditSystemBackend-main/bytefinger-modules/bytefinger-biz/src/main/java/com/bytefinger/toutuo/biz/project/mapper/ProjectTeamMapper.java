@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.project.mapper;import com.baomidou.mybatisplus.core.mapper.BaseMapper;import com.bytefinger.toutuo.biz.project.domain.ProjectTeam;import org.apache.ibatis.annotations.Mapper;/** * <p> * 项目团队信息 Mapper 接口 * </p> * * @author Jone * @since 2023-01-31 */@Mapperpublic interface ProjectTeamMapper extends BaseMapper<ProjectTeam> {}

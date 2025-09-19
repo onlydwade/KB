@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytefinger.toutuo.biz.customer.mapper.CustomerMapper">
+
+
+    <select id="deleteByIds" resultType="String">
+        DELETE FROM biz_customer WHERE id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="cu.id">
+        INSERT INTO biz_customer
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="cu.id != null">id,</if>
+            <if test="cu.customerName != null">customer_name,</if>
+            <if test="cu.customerNo != null">customer_no,</if>
+            <if test="cu.customerCompanyNo != null">customer_company_no,</if>
+            <if test="cu.customerType != null">customer_type,</if>
+            <if test="cu.cooperationType != null">cooperation_type,</if>
+            <if test="cu.customerIndustry != null">customer_industry,</if>
+            <if test="cu.customerLevel != null">customer_level,</if>
+            <if test="cu.provinceCode != null">province_code,</if>
+            <if test="cu.cityCode != null">city_code,</if>
+            <if test="cu.areaCode != null">area_code,</if>
+            <if test="cu.address != null">address,</if>
+            <if test="cu.remark != null">remark,</if>
+            <if test="cu.keywords != null">keywords,</if>
+            <if test="cu.createUserId != null">create_user_id,</if>
+            <if test="cu.createTime != null">create_time,</if>
+            <if test="cu.updateUserId != null">update_user_id,</if>
+            <if test="cu.updateTime != null">update_time,</if>
+            <if test="cu.followTime != null">follow_time,</if>
+            <if test="cu.deleted != null">deleted,</if>
+            <if test="cu.followUserId != null">follow_user_id,</if>
+            <if test="cu.ownerUserId != null">owner_user_id,</if>
+            <if test="cu.legalEntity != null">legal_entity,</if>
+            <if test="cu.registeredCapital != null">registered_capital,</if>
+            <if test="cu.personnelSize != null">personnel_size,</if>
+            <if test="cu.establishmentDate != null">establishment_date,</if>
+            <if test="cu.website != null">website,</if>
+            <if test="cu.registeredAddress != null">registered_address,</if>
+            <if test="cu.companyIntroduction != null">company_introduction,</if>
+            <if test="cu.maintenanceUserId != null">maintenance_user_id,</if>
+            <if test="cu.source != null">source,</if>
+            <if test="cu.companyType != null">company_type,</if>
+            <if test="cu.workBrief != null">work_brief,</if>
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="cu.id != null">#{cu.id},</if>
+            <if test="cu.customerName != null">#{cu.customerName},</if>
+            <if test="cu.customerNo != null">#{cu.customerNo},</if>
+            <if test="cu.customerCompanyNo != null">#{cu.customerCompanyNo},</if>
+            <if test="cu.customerType != null">#{cu.customerType},</if>
+            <if test="cu.cooperationType != null">#{cu.cooperationType},</if>
+            <if test="cu.customerIndustry != null">#{cu.customerIndustry},</if>
+            <if test="cu.customerLevel != null">#{cu.customerLevel},</if>
+            <if test="cu.provinceCode != null">#{cu.provinceCode},</if>
+            <if test="cu.cityCode != null">#{cu.cityCode},</if>
+            <if test="cu.areaCode != null">#{cu.areaCode},</if>
+            <if test="cu.address != null">#{cu.address},</if>
+            <if test="cu.remark != null">#{cu.remark},</if>
+            <if test="cu.keywords != null">#{cu.keywords},</if>
+            <if test="cu.createUserId != null">#{cu.createUserId},</if>
+            <if test="cu.createTime != null">#{cu.createTime},</if>
+            <if test="cu.updateUserId != null">#{cu.updateUserId},</if>
+            <if test="cu.updateTime != null">#{cu.updateTime},</if>
+            <if test="cu.followTime != null">#{cu.followTime},</if>
+            <if test="cu.deleted != null">#{cu.deleted},</if>
+            <if test="cu.followUserId != null">#{cu.followUserId},</if>
+            <if test="cu.ownerUserId != null">#{cu.ownerUserId},</if>
+            <if test="cu.legalEntity != null">#{cu.legalEntity},</if>
+            <if test="cu.registeredCapital != null">#{cu.registeredCapital},</if>
+            <if test="cu.personnelSize != null">#{cu.personnelSize},</if>
+            <if test="cu.establishmentDate != null">#{cu.establishmentDate},</if>
+            <if test="cu.website != null">#{cu.website},</if>
+            <if test="cu.registeredAddress != null">#{cu.registeredAddress},</if>
+            <if test="cu.companyIntroduction != null">#{cu.companyIntroduction},</if>
+            <if test="cu.maintenanceUserId != null">#{cu.maintenanceUserId},</if>
+            <if test="cu.source != null">#{cu.source},</if>
+            <if test="cu.companyType != null">#{cu.companyType},</if>
+            <if test="cu.workBrief != null">#{cu.workBrief},</if>
+        </trim>
+    </insert>
+
+</mapper>

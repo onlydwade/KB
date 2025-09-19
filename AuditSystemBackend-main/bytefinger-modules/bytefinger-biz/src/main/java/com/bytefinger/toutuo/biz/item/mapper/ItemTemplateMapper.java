@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.item.mapper;import com.bytefinger.toutuo.biz.item.domain.ItemTemplate;import com.baomidou.mybatisplus.core.mapper.BaseMapper;import org.apache.ibatis.annotations.Mapper;/** * <p> * 审计模版 Mapper 接口 * </p> * * @author Jone * @since 2025-08-05 */@Mapperpublic interface ItemTemplateMapper extends BaseMapper<ItemTemplate> {}

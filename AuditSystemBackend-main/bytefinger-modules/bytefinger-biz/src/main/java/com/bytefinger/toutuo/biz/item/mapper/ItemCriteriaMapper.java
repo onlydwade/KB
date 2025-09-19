@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.item.mapper;import com.baomidou.mybatisplus.core.mapper.BaseMapper;import com.bytefinger.toutuo.biz.item.domain.ItemCriteria;import org.apache.ibatis.annotations.Mapper;/** * <p> * 审计项目标准表 Mapper 接口 * </p> * * @author Jone * @since 2025-08-07 */@Mapperpublic interface ItemCriteriaMapper extends BaseMapper<ItemCriteria> {}

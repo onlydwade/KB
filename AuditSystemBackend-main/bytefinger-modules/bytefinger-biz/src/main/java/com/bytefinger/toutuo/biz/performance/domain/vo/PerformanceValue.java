@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.performance.domain.vo;import lombok.Data;import java.math.BigDecimal;/** * @author pat * @date 2022/11/24 15:39 **/@Datapublic class PerformanceValue {    private Long id = 0L;    private String key;    private String name;    private Integer index;    private BigDecimal value = null;    private boolean readonly = false;}

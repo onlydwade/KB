@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.performance.domain.vo;import io.swagger.annotations.ApiModel;import lombok.Data;import lombok.experimental.Accessors;@Data@Accessors(chain = true)@ApiModel(value = "业绩动态表统计")public class ProjectListStepVo {    private Long projectId;    private Long stepId;    private String stepName;}

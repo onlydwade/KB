@@ -1,0 +1,44 @@
+# System Service Configuration
+# Data ID: bytefinger-system
+# Group: bytefinger-audit-local
+# Namespace: public
+
+server:
+  port: 8400
+
+spring:
+  application:
+    name: bytefinger-system
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        username: nacos
+        password: nacos
+        namespace: 
+        group: DEFAULT_GROUP
+      config:
+        server-addr: localhost:8848
+        username: nacos
+        password: nacos
+        namespace:
+        group: bytefinger-audit-local
+        file-extension: yml
+
+# File upload configuration (specific to system service)
+file:
+  path: /opt/auditsystem/uploads
+  prefix: /api/files
+
+# Department configuration
+user:
+  deptName: 系统管理部
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always

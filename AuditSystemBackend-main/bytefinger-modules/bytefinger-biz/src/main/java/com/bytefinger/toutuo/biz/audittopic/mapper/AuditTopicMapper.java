@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.audittopic.mapper;import com.bytefinger.toutuo.biz.audittopic.domain.AuditTopic;import com.baomidou.mybatisplus.core.mapper.BaseMapper;import org.apache.ibatis.annotations.Mapper;/** * <p> * 话题表 Mapper 接口 * </p> * * @author Jone * @since 2025-08-27 */@Mapperpublic interface AuditTopicMapper extends BaseMapper<AuditTopic> {}

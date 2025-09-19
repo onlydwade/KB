@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bytefinger.toutuo.biz.projectextension.mapper.ProjectExtensionExitMapper">
+
+    <sql id="selectBaseData">
+        SELECT
+        DISTINCT project.*
+        FROM
+        biz_project project
+        left join biz_project_extension extension on extension.project_id = project.id
+        where 1=1
+        and project.id in ( SELECT id FROM biz_project pro where pro.service_status ='ZAI_GUAN' or pro.service_status =
+        'YI_DAO_QI')
+        and project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+        and project.id not in
+        (SELECT extension.project_id FROM biz_project_extension extension LEFT JOIN biz_project project on project.id =
+        extension.project_id
+        where extension.process_state = 2 and project.service_status = 'YI_DAO_QI' or extension.process_mode in(1,2))
+        and project.expire !='YI_SHI_XIAO'
+        and project.is_sync_operation = 'SHI'
+        <if test="cm.processState != null and cm.processState == 0 ">
+            and project.id not in
+            (SELECT extension.project_id FROM biz_project_extension extension LEFT JOIN biz_project project on
+            project.id = extension.project_id
+            where 1=1
+                and `extension`.process_state in (1,2,3)
+            )
+        </if>
+        <if test="cm.processState != null and cm.processState != 0 ">
+            and project.id in
+            (SELECT extension.project_id FROM biz_project_extension extension LEFT JOIN biz_project project on
+            project.id = extension.project_id
+            where 1=1
+                and `extension`.process_state = #{cm.processState}
+            )
+        </if>
+        <if test="cm.serviceContent != null">
+            and
+            (
+            <foreach collection="cm.serviceContent" index="index" item="item" open="" separator="" close="">
+                <if test="index != 0">
+                    or
+                </if>
+                project.service_content like '%${item}%'
+            </foreach>
+            )
+        </if>
+        <choose>
+            <!--  所在部门及下级部门+员工+拓后负责人   -->
+            <when test="'SHOW_SUB' == cm.dataRole">
+                <!-- 我部门下的数据 -->
+                and (
+                project.company_id IN
+                <foreach collection="cm.deptIds" index="index" item="item" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+                OR project.id IN ( SELECT bpu.record_id FROM biz_project_team bpu WHERE bpu.user_id = #{cm.userId})
+                OR project.attributor_user_id = #{cm.userId}
+                OR project.create_user_id = #{cm.userId}
+                OR project.principal_id = #{cm.userId}
+                )
+            </when>
+            <!--            <when test="cm.assessState != ''">-->
+            <!--&#45;&#45;                 and assess.assess_state = #{cm.assessState}-->
+            <!--            </when>-->
+            <!-- 全部数据 -->
+            <when test="'SHOW_ALL' == cm.dataRole">
+
+            </when>
+
+            <!-- 默认本人数据 -->
+            <otherwise>
+                AND (
+                project.attributor_user_id = #{cm.userId}
+                OR project.principal_id = #{cm.userId}
+                OR project.create_user_id = #{cm.userId}
+                OR project.id IN ( SELECT bpu.record_id FROM biz_project_team bpu WHERE bpu.user_id = #{cm.userId})
+                )
+            </otherwise>
+        </choose>
+    </sql>
+
+
+    <!-- 项目基础列表 -->
+    <select id="list" resultType="com.bytefinger.toutuo.biz.project.domain.Project">
+        <include refid="selectBaseData"></include>
+        <if test="ew.sqlSegment != '' ">
+            AND ${ew.sqlSegment}
+        </if>
+    </select>
+
+
+</mapper>

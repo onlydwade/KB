@@ -1,0 +1,16 @@
+INSERT INTO `biz_oa_approval_template` (`id`, `template_id`, `template_name`, `short_name`, `project_type`, `step_menu_id`, `main_process`, `level`, `operate`, `create_time`, `expire`) VALUES (20, '18c24889724b5281a9f98464dc69bf65', '单一投标项目-标书评审', '发起OA审批', 'DAN_YI_TOU_BIAO_XIANG_MU', 37, 1, 0, 0, '2023-02-27 16:09:22', NULL);
+INSERT INTO `biz_oa_approval_template` (`id`, `template_id`, `template_name`, `short_name`, `project_type`, `step_menu_id`, `main_process`, `level`, `operate`, `create_time`, `expire`) VALUES (21, '18c2494a2ada2759889101d44189df73', '单一投标项目-结项审批', '发起OA审批', 'DAN_YI_TOU_BIAO_XIANG_MU', 40, 1, 0, 0, '2023-02-27 16:09:22', NULL);
+INSERT INTO `biz_oa_approval_template` (`id`, `template_id`, `template_name`, `short_name`, `project_type`, `step_menu_id`, `main_process`, `level`, `operate`, `create_time`, `expire`) VALUES (22, '18c2494a2ada2759889101d44189df73', '单一非投标项目-结项审批', '发起OA审批', 'DAN_YI_FEI_TOU_BIAO_XIANG_MU', 40, 1, 0, 0, '2023-02-27 16:09:22', NULL);
+INSERT INTO `biz_oa_approval_template` (`id`, `template_id`, `template_name`, `short_name`, `project_type`, `step_menu_id`, `main_process`, `level`, `operate`, `create_time`, `expire`) VALUES (23, '18c24889724b5281a9f98464dc69bf65', '单一非投标项目-标书评审', '发起OA审批', 'DAN_YI_FEI_TOU_BIAO_XIANG_MU', 37, 1, 0, 0, '2023-02-27 16:09:22', NULL);
+
+INSERT INTO `biz_oa_approval_template` (`id`, `template_id`, `template_name`, `short_name`, `project_type`, `step_menu_id`, `main_process`, `level`, `operate`, `create_time`, `expire`) VALUES (24, '18c1a5a4e0a3be038d057954fb1baa28', '单一非投标项目-投标复盘评审', '发起OA审批', 'DAN_YI_FEI_TOU_BIAO_XIANG_MU', 14, 1, 0, 0, '2023-02-27 16:09:22', NULL);
+INSERT INTO `biz_oa_approval_template` (`id`, `template_id`, `template_name`, `short_name`, `project_type`, `step_menu_id`, `main_process`, `level`, `operate`, `create_time`, `expire`) VALUES (25, '18c1a5a4e0a3be038d057954fb1baa28', '单一投标项目-投标复盘评审', '发起OA审批', 'DAN_YI_TOU_BIAO_XIANG_MU', 14, 1, 0, 0, '2023-02-27 16:09:22', NULL);
+INSERT INTO `biz_oa_approval_template` (`id`, `template_id`, `template_name`, `short_name`, `project_type`, `step_menu_id`, `main_process`, `level`, `operate`, `create_time`, `expire`) VALUES (26, '18c1a594061c452ccc7f7f145249c769', '单一非投标项目-大区评审', '发起OA审批', 'DAN_YI_FEI_TOU_BIAO_XIANG_MU', 12, 1, 0, 0, '2023-02-27 16:19:37', 'TUO_YUN_YI_TI_HUA_XIANG_MU');
+INSERT INTO `biz_oa_approval_template` (`id`, `template_id`, `template_name`, `short_name`, `project_type`, `step_menu_id`, `main_process`, `level`, `operate`, `create_time`, `expire`) VALUES (27, '18c1a594061c452ccc7f7f145249c769', '单一投标项目-大区评审', '发起OA审批', 'DAN_YI_TOU_BIAO_XIANG_MU', 12, 1, 0, 0, '2023-02-27 16:19:37', 'TUO_YUN_YI_TI_HUA_XIANG_MU');
+
+
+
+
+update biz_oa_approval_template set expire = 'PU_TONG_XIANG_MU' where id in ('3','10');
+update biz_oa_approval_template set expire = 'TUO_YUN_YI_TI_HUA_XIANG_MU' where id in ('26','27');
+update biz_oa_approval_template set expire = 'ZHONG_DIAN_GUAN_ZHU_XIANG_MU' where id in ('2','9');

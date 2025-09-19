@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.external.mapper;import com.baomidou.mybatisplus.core.mapper.BaseMapper;import com.bytefinger.toutuo.biz.external.domain.IntMainHr;import org.apache.ibatis.annotations.Mapper;/** * <p> * 主数据岗位表 Mapper 接口 * </p> * * @author Jone * @since 2023-03-02 */@Mapperpublic interface IntMainHrMapper extends BaseMapper<IntMainHr> {}

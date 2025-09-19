@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.bytefinger.toutuo</groupId>
+        <artifactId>bytefinger-toutuo</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <packaging>pom</packaging>
+    <artifactId>bytefinger-common</artifactId>
+
+    <description>
+        common-通用模块
+    </description>
+
+    <modules>
+        <module>bytefinger-common-core</module>
+        <module>bytefinger-common-datasource</module>
+        <module>bytefinger-common-log</module>
+        <module>bytefinger-common-redis</module>
+        <module>bytefinger-common-security</module>
+        <module>bytefinger-common-swagger</module>
+        <module>bytefinger-common-das</module>
+        <module>bytefinger-common-mq</module>
+    </modules>
+
+</project>

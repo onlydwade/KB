@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytefinger.toutuo.biz.audit.mapper.AuditMapper">
+
+    <sql id="selectBaseData">
+        SELECT
+            DISTINCT audit.*
+        FROM
+            biz_audit audit
+            where 1=1
+        and (1 != 1 or
+               (
+                   1 = 1
+<!--                   <if test="cm.serviceStatus != null and cm.serviceStatus.size>0" >-->
+<!--                       and (1!=1-->
+<!--                       <foreach collection="cm.serviceStatus" index="index" item="item" open="" separator=" " close="">-->
+<!--&lt;!&ndash;                           <if test="item == 'WEI_JIE_XIANG' ">&ndash;&gt;-->
+<!--&lt;!&ndash;                               or audit.service_status not in ('ZAI_GUAN','YI_FEI_ZHI','YI_ZHONG_ZHI','YI_WAN_JIE','YI_TUI_CHANG','CLOSE_FILE','WEI_ZHONG_BIAO')&ndash;&gt;-->
+<!--&lt;!&ndash;                           </if>&ndash;&gt;-->
+<!--                           <if test="item != 'WEI_JIE_XIANG' ">-->
+<!--                               or audit.service_status = #{item}-->
+<!--                           </if>-->
+<!--                       </foreach>-->
+<!--                       )-->
+<!--                   </if>-->
+
+
+              )
+        )
+<!--        <if test="cm.leaderAuditorId != null" >-->
+<!--            and audit.id IN (-->
+<!--                SELECT bat.audit_id FROM biz_audit_team bat-->
+<!--                WHERE bat.user_id = #{cm.leaderAuditorId} and bat.role_code = 'LEADER_AUDITOR'-->
+<!--            )-->
+<!--        </if>-->
+
+<!--        <if test="cm.auditorIds != null and cm.auditorIds.size>0" >-->
+<!--            and audit.id IN (-->
+<!--            SELECT bat.audit_id FROM biz_audit_team bat-->
+<!--            WHERE bat.user_id in-->
+<!--                <foreach collection="cm.auditorIds" index="index" item="item" open="(" separator="," close=")">-->
+<!--                    #{item}-->
+<!--                </foreach>-->
+<!--                and bat.role_code != 'LEADER_AUDITOR'-->
+<!--            )-->
+<!--        </if>-->
+
+
+        <choose>
+            <!--  所在部门及下级部门+员工   -->
+            <when test="'SHOW_SUB' == cm.dataRole">
+                <!-- 我部门下的数据 -->
+                and (
+                audit.id IN (
+                    SELECT bat.audit_id FROM biz_audit_team bat
+                           WHERE bat.user_id = #{cm.userId}
+                              or bat.dept_id IN
+                                <foreach collection="cm.deptIds" index="index" item="item" open="(" separator="," close=")">
+                                    #{item}
+                                </foreach>
+                )
+                OR audit.create_user_id = #{cm.userId}
+                )
+            </when>
+
+            <!-- 全部数据 -->
+            <when test="'SHOW_ALL' == cm.dataRole">
+
+            </when>
+
+            <!-- 默认本人数据 -->
+            <otherwise>
+                AND (
+                audit.create_user_id = #{cm.userId}
+                OR audit.id IN
+                    (SELECT bat.audit_id FROM biz_audit_team bat WHERE bat.user_id = #{cm.userId})
+                OR audit.create_user_id = #{cm.userId}
+                )
+            </otherwise>
+        </choose>
+    </sql>
+
+
+    <!-- 项目基础列表 -->
+    <select id="list" resultType="com.bytefinger.toutuo.biz.audit.domain.Audit">
+        <include refid="selectBaseData"></include>
+        <if test="ew.sqlSegment != '' ">
+            AND ${ew.sqlSegment}
+        </if>
+    </select>
+
+    <select id="listProjectStep" resultType="com.bytefinger.toutuo.biz.performance.domain.BO.ProjectActualBO">
+        SELECT
+        bp.company_id as companyId,
+        bp.project_no as projectNo,
+        bp.sign_time as signTime,
+        bp.contract_amount as contractAmount,
+        bp.contract_annual_amount as contractAnnualAmount,
+        bp.annual_conversion_amount as annualConversionAmount,
+        bp.performance_confirm_time as performanceConfirmTime,
+        bp.service_begin_time as serviceStarttime,
+        bp.service_end_time as serviceEndtime,
+        bp.proposed_service_period as proposedServicePeriod,
+        bp.id
+        FROM
+        biz_project bp
+        inner join biz_project_step step on bp.id = step.project_id
+        inner join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+        WHERE  bp.in_stock = 'FOU'
+        and bp.expire = 'YOU_XIAO'
+        and bp.service_status not in ('YI_ZHONG_ZHI')
+        and bp.source_id is null
+        and bp.performance_confirm_time is not null
+        and bp.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+        and step.`status` = 1
+        and stepmenu.`code` = 'yjqrsp'
+        <if test="cm.userId != null">
+            AND (
+            bp.attributor_user_id = #{cm.userId}
+            OR bp.id IN ( SELECT bpt.record_id FROM biz_project_team bpt WHERE bpt.user_id = #{cm.userId})
+            )
+        </if>
+
+        <if test="ew.sqlSegment != '' ">
+            AND ${ew.sqlSegment}
+        </if>
+    </select>
+
+
+    <update id="updateCreateUserId">
+        update
+        biz_project
+        set
+        create_user_id=#{userId},
+        update_user_id=#{userId}
+        where
+        id=#{id};
+    </update>
+
+    <update id="updateTime">
+        update
+        biz_project
+        set create_time=#{createTime},
+        update_time=#{updateTime}
+        where
+        id=#{id}
+    </update>
+</mapper>

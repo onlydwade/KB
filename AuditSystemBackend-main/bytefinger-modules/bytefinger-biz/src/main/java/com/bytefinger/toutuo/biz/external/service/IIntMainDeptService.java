@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.external.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.api.biz.user.domain.IntMainDept;/** * <p> * 主数据组织表 服务类 * </p> * * @author Jone * @since 2023-02-13 */public interface IIntMainDeptService extends IService<IntMainDept> {}

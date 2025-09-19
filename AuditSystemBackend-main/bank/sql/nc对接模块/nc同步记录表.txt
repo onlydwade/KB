@@ -1,0 +1,11 @@
+#NC同步记录表
+CREATE TABLE `biz_project_company_finance_sync_data` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'nc财务数据同步日志表主键ID',
+  `reportcode` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '报表编码，reportcode用友方提供',
+  `organizationcode` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '统一信用代码',
+  `period` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '查询年',
+  `result_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci COMMENT '同步过来的具体数据，以JSON数组字符串展示',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=461 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci ROW_FORMAT=DYNAMIC COMMENT='财务数据同步记录表';

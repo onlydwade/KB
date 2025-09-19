@@ -1,0 +1,43 @@
+# Report Service Configuration
+# Data ID: bytefinger-report
+# Group: bytefinger-audit-local
+# Namespace: public
+
+server:
+  port: 8700
+
+spring:
+  application:
+    name: bytefinger-report
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        username: nacos
+        password: nacos
+        namespace: 
+        group: DEFAULT_GROUP
+      config:
+        server-addr: localhost:8848
+        username: nacos
+        password: nacos
+        namespace:
+        group: bytefinger-audit-local
+        file-extension: yml
+
+# Department configuration
+user:
+  deptName: 报表管理部
+
+# Download configuration (if needed for report service)
+downLoad:
+  host: http://localhost:8400
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: always

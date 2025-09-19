@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.item.service;import com.bytefinger.toutuo.biz.item.domain.ItemTemplateRef;import com.baomidou.mybatisplus.extension.service.IService;/** * <p> * 审计模版关系表 服务类 * </p> * * @author Jone * @since 2025-08-05 */public interface IItemTemplateRefService extends IService<ItemTemplateRef> {}

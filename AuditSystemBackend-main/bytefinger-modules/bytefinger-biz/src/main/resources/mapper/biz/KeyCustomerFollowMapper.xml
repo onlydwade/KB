@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytefinger.toutuo.biz.workbrief.mapper.KeyCustomerFollowMapper">
+
+    <update id="deleteByBriefId">
+        update biz_project_key_customer_follow set deleted = 2,update_time = NOW() where deleted = 0 and brief_id = #{briefId}
+    </update>
+
+    <select id="getList" resultType="com.bytefinger.toutuo.biz.customer.domain.vo.CustomerVO">
+        SELECT cus.id,cus.customer_name FROM biz_customer cus
+        JOIN biz_customer_follow_log cuf ON cus.id = cuf.record_id AND cuf.deleted = 0
+        JOIN biz_customer_follow_log_detail cufd ON cuf.id = cufd.follow_log_id  AND cufd.deleted = 0
+        WHERE cus.deleted = 0 AND cufd.update_time &gt;= #{startTime} AND cufd.update_time &lt;= #{endTime}
+        AND cufd.task_status = 'CHI_XUN_GEN_JIN' AND cus.work_brief = 'SHI'
+        GROUP BY cus.id,cus.customer_name
+    </select>
+
+    <select id="getListByCustomerId" resultType="com.bytefinger.toutuo.biz.workbrief.vo.KeyCustomerInfoVo">
+        SELECT cuf.id,CONCAT_WS('', cufd.work_summary, IF(cuf.visit_time IS NOT NULL, CONCAT('(', DATE_FORMAT(cuf.visit_time, '%Y-%m-%d'), ')'), '')) AS workSummary,
+               cufd.follow_status,cufd.head visitUserName,cufd.team_establish teamEstablish FROM biz_customer_follow_log_detail cufd
+        JOIN biz_customer_follow_log cuf ON cufd.follow_log_id = cuf.id AND cuf.deleted = 0
+        JOIN biz_customer cus ON cuf.record_id = cus.id AND cus.deleted = 0
+        WHERE cufd.deleted = 0
+        AND cufd.update_time &gt;= #{startTime} AND cufd.update_time &lt;= #{endTime}
+        AND cufd.task_status = 'CHI_XUN_GEN_JIN' AND cus.id = #{customerId}
+        ORDER BY cufd.update_time DESC
+    </select>
+</mapper>

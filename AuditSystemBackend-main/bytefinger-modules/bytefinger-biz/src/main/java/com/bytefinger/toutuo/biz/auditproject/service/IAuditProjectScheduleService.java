@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.auditproject.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.biz.auditproject.domain.AuditProjectSchedule;/** * <p> * 项目管理 服务类 * </p> * * @author Jone * @since 2025-08-07 */public interface IAuditProjectScheduleService extends IService<AuditProjectSchedule> {}

@@ -1,0 +1,31 @@
+#1.新增拓展项目库续签业绩增量等字段
+ALTER TABLE biz_project ADD is_performance_increment VARCHAR (255) DEFAULT 'FOU' COMMENT '是否有业绩增量(FOU:否,SHI:是),默认否';
+ALTER TABLE biz_project ADD annual_conversion_amounts  decimal (20,2) DEFAULT NULL COMMENT '增量当年转化收入';
+ALTER TABLE biz_project ADD contract_annual_amounts  decimal (20,2) DEFAULT NULL COMMENT '增量合同年度金额';
+ALTER TABLE biz_project ADD contract_amounts  decimal (20,2) DEFAULT NULL COMMENT '增量合同总金额';
+
+#2.增加项目重点关注项目选项,以及增加其他特殊情况的内容
+ALTER TABLE biz_project ADD key_focus_project  VARCHAR (255) DEFAULT NULL COMMENT '重点关注项目选项(枚举类型TOU_BIAO_WU_XIAO_YUAN_YIN)，可以多选,以逗号分割,1.年饱和收入1000万以上的项目,2.重点战略项目,3.需要前期投资项目,4.运营测算亏损的战略项目,5.管理层关注的重点项目,6.其他特殊情况';
+
+
+ALTER TABLE biz_project ADD other_description  TEXT  DEFAULT NULL COMMENT '其他特殊情况内容';
+
+
+ALTER TABLE biz_project ADD bid_type  VARCHAR (100) DEFAULT NULL COMMENT '投标类型(枚举类型TOU_BIAO_LEI_XING),纸质标(ZHI_ZHI_BIAO),电子标(DIAN_ZHI_BIAO)';
+ALTER TABLE biz_project ADD application_type  VARCHAR (100) DEFAULT NULL COMMENT '申请类型(枚举类型SHEN_QING_LEI_XING),投标类型只有选择纸质标才可以显示选择,总部级印章(ZONG_BU_JI_BIE_YIN_ZHANG),单位级别(DAN_WEI_JI_BIE_YIN_ZHANG)';
+ALTER TABLE biz_project ADD related_seal_type  VARCHAR (100) DEFAULT NULL COMMENT '关联用印类型(枚举类型，纸质标GUAN_LIAN_YONG_YIN_LEI_XING，电子标GUAN_LIAN_YONG_YIN_LEI_XING_DIAN_ZI)。当投标类型为纸质标时,可以多选,以逗号分割,1.盖法人签章,2.盖法人手签章，3.法人签字,4.借公章,5.借法人章。当投标类型为电子标时,只能单选,1.CA证书盖章,2.投标文件需借CA。';
+
+
+
+
+ALTER TABLE biz_project ADD is_sync_operation varchar(100)  DEFAULT NULL COMMENT '是否同步到拓后运营';
+UPDATE biz_project set is_sync_operation = 'FOU';
+
+
+ALTER TABLE biz_project ADD is_in_management varchar(100)  DEFAULT NULL COMMENT '是否在管';
+update biz_project set is_in_management = 'SHI' WHERE id in (
+select project_id from biz_project_step where step_menu_id = 16 and `status` = 1
+);
+
+#修改项目新增时判断是否为股权合作类项目，如果是则设置续签项目状态为默认否。
+UPDATE biz_project SET in_stock = 'FOU' WHERE project_type = 'GU_QUAN_HE_ZUO_XIANG_MU' AND in_stock  IS NULL;

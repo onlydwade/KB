@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytefinger.toutuo.biz.workbrief.mapper.WorkBriefPushUserMapper">
+
+    <update id="deleteByBriefId">
+        update biz_work_brief_push_user set deleted = 2,update_time = NOW() where deleted = 0 and brief_id = #{briefId}
+    </update>
+
+    <select id="getListByBriefId" resultType="com.bytefinger.toutuo.biz.workbrief.dto.WorkPushUserDto">
+        SELECT
+        DISTINCT
+        wbpu.brief_id briefId,
+        REPLACE(wbpu.user_id, "group_user_", "") userId,
+        wbpu.push_status pushStatus,
+        su.realname AS userName
+        FROM
+        biz_work_brief_push_user wbpu
+        JOIN sys_user su ON REPLACE(wbpu.user_id, "group_user_", "") = su.user_id
+        AND su.del_flag = 0 AND wbpu.deleted = 0
+        <if test="ids != null and ids.size()>0">
+            AND wbpu.brief_id in
+            <foreach collection="ids" open="(" close=")" separator="," item="id">
+                #{id}
+            </foreach>
+        </if>
+    </select>
+
+</mapper>

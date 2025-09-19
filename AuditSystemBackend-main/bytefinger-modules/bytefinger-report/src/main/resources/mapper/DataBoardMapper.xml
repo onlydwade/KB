@@ -1,0 +1,1473 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytefinger.toutuo.board.mapper.DataBoardMapper">
+    <sql id="selectDataRole">
+        <choose>
+            <!--  所在部门及下级部门+员工   -->
+            <when test="'SHOW_SUB' == cm.dataRole">
+                <!-- 我部门下的数据 -->
+                and (
+                project.company_id IN (SELECT
+                dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                )
+                OR
+                project.company_id = #{recordId})
+            </when>
+            <!-- 全部数据 -->
+            <when test="'SHOW_ALL' == cm.dataRole">
+                <!-- 默认全部 -->
+                and (
+                project.company_id IN (SELECT
+                dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                )
+                OR
+                project.company_id = #{recordId})
+            </when>
+
+            <!-- 本人数据 -->
+            <when test="'SHOW_ME' == cm.dataRole">
+                AND (
+                project.attributor_user_id = #{cm.userId}
+                OR project.id IN ( SELECT projectu.record_id FROM biz_project_team projectu WHERE projectu.user_id =
+                #{cm.userId})
+                )
+            </when>
+            <otherwise>
+                1=1
+            </otherwise>
+        </choose>
+        AND project.in_stock = 'FOU'
+        AND (project.renewal =0 OR project.renewal IS NULL)
+        AND project.expire = 'YOU_XIAO'
+        AND project.source_id is null
+        AND project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+        <!-- 默认去掉去掉续签、重新投标和终止的项目and去掉是否为续签项目标记为是的项目数据 -->
+        and project.service_status not in ('YI_ZHONG_ZHI')
+    </sql>
+    <sql id="selectData">
+        <choose>
+            <!--  所在部门及下级部门+员工   -->
+            <when test="'SHOW_SUB' == cm.dataRole">
+                <!-- 我部门下的数据 -->
+                and (
+                project.company_id IN (SELECT
+                dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                )
+                OR
+                project.company_id = #{recordId})
+            </when>
+            <!-- 全部数据 -->
+            <when test="'SHOW_ALL' == cm.dataRole">
+                <!-- 默认全部 -->
+                and (
+                project.company_id IN (SELECT
+                dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                )
+                OR
+                project.company_id = #{recordId})
+            </when>
+
+            <!-- 本人数据 -->
+            <when test="'SHOW_ME' == cm.dataRole">
+                AND (
+                project.attributor_user_id = #{cm.userId}
+                OR project.id IN ( SELECT projectu.record_id FROM biz_project_team projectu WHERE projectu.user_id =
+                #{cm.userId})
+                )
+            </when>
+            <otherwise>
+
+                1=1
+            </otherwise>
+        </choose>
+        <!-- 默认去掉去掉续签、重新投标和终止的项目and去掉是否为续签项目标记为是的项目数据 -->
+        and project.service_status not in ('YI_ZHONG_ZHI')
+    </sql>
+    <select id="getCityByProvince" resultType="com.bytefinger.toutuo.board.domain.ProjectCity">
+        SELECT
+            COUNT( 1 ) AS projectCount,
+            project.province_code AS areaCode,
+            sc.`name` AS areaName
+        FROM
+            biz_project project
+            LEFT JOIN sys_cnarea sc ON sc.area_code = project.province_code
+        WHERE
+            1=1
+            <!-- 是否有效：有效 -->
+            AND project.expire = 'YOU_XIAO'
+
+            <!--剔除补录项目且计算业绩为否的项目 -->
+            and project.is_count_performance != 'FOU'
+
+            <!-- 项目类型：单一投标和单一非投标 -->
+            AND project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+
+            <!-- 归属单位：选择的业务架构 -->
+            and (
+                project.company_id IN (
+                  SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                )
+                OR
+                project.company_id = #{recordId}
+            )
+
+            <if test="zaiguan == 1">
+                <!-- 项目状态：在管 -->
+                and project.service_status = 'ZAI_GUAN'
+            </if>
+
+            <if test="zaiguan == 2">
+                <!--是否续签项目：否-->
+                AND project.in_stock = 'FOU'
+
+                <!-- 项目状态：去掉 已废止 状态数据 -->
+                AND project.service_status != 'YI_FEI_ZHI'
+
+                <!-- 业绩确认时间：选择的年份 -->
+                and DATE_FORMAT(project.performance_confirm_time, '%Y') = #{currYear}
+
+                <!-- 项目流程：完成业绩确认节点 -->
+                and project.id in (
+                select
+                step.project_id id
+                from
+                biz_project_step step
+                join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                where
+                step.`status` = 1
+                AND stepmenu.`code` = 'yjqrsp'
+                )
+            </if>
+
+        GROUP BY project.province_code,sc.`name`
+        ORDER BY projectCount DESC
+    </select>
+
+    <select id="getCityByCity" resultType="com.bytefinger.toutuo.board.domain.ProjectCity">
+        SELECT
+            COUNT( 1 ) AS projectCount,
+            project.city_code AS areaCode,
+            project.province_code AS provinceCode,
+            sc.`name` AS areaName
+        FROM
+            biz_project project
+            LEFT JOIN sys_cnarea sc ON sc.area_code = project.city_code
+        WHERE
+            1=1
+            <!-- 是否有效：有效 -->
+            AND project.expire = 'YOU_XIAO'
+
+            <!--剔除补录项目且计算业绩为否的项目 -->
+            and project.is_count_performance != 'FOU'
+
+            <!-- 项目类型：单一投标和单一非投标 -->
+            AND project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+
+            <!-- 归属单位：选择的业务架构 -->
+            and (
+                project.company_id IN (
+                  SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                )
+                OR
+                project.company_id = #{recordId}
+            )
+
+            <if test="zaiguan == 1">
+                <!-- 项目状态：在管 -->
+                and project.service_status = 'ZAI_GUAN'
+            </if>
+
+            <if test="zaiguan == 2">
+                <!--是否续签项目：否-->
+                AND project.in_stock = 'FOU'
+
+                <!-- 项目状态：去掉 已废止 状态数据 -->
+                AND project.service_status != 'YI_FEI_ZHI'
+
+                <!-- 业绩确认时间：选择的年份 -->
+                and DATE_FORMAT(project.performance_confirm_time, '%Y') = #{currYear}
+
+                <!-- 项目流程：完成业绩确认节点 -->
+                and project.id in (
+                select
+                step.project_id id
+                from
+                biz_project_step step
+                join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                where
+                step.`status` = 1
+                AND stepmenu.`code` = 'yjqrsp'
+                )
+            </if>
+        GROUP BY project.city_code,
+        project.province_code
+        ORDER BY projectCount DESC
+    </select>
+
+    <select id="getParentNameByCode" resultType="com.bytefinger.toutuo.board.domain.ProjectCity">
+        SELECT `name` AS parentName
+        FROM sys_cnarea
+        WHERE area_code = #{code} LIMIT 1
+    </select>
+    <select id="getSalesVolume" resultType="java.util.Map">
+        SELECT
+        <foreach collection="months" index="index" item="item" separator=",">
+            SUM(IF((DATE_FORMAT(project.performance_confirm_time, '%Y-%m') = #{item}), project.contract_amount, 0)) AS
+            `${item}`
+        </foreach>
+        FROM
+        biz_project project
+        LEFT JOIN biz_project_step bps ON bps.project_id = project.id
+        WHERE
+        1=1
+        AND bps.`status` = 1
+        AND bps.step_menu_id in (select id from biz_project_step_menu where parent_id in (select id from
+        biz_project_step_menu where `code` in('yjqr')))
+        AND project.performance_confirm_time IS NOT NULL AND project.contract_amount IS NOT NULL
+        <include refid="selectDataRole"></include>
+    </select>
+    <select id="getCityRanking" resultType="java.util.Map">
+        SELECT
+            dept_id AS deptId,
+            dept_name AS deptName,
+            (
+                SELECT
+                    IFNULL( SUM( project.contract_amount ), 0 )
+                FROM
+                    biz_project project
+                        LEFT JOIN biz_project_step bps ON bps.project_id = project.id
+                WHERE
+                    DATE_FORMAT( project.performance_confirm_time, '%Y' ) = #{currYear}
+                  AND bps.`status` = 1
+                  AND bps.step_menu_id in (select id from biz_project_step_menu where parent_id in (select id from
+        biz_project_step_menu where `code` in('yjqr')))
+                  AND project.in_stock = 'FOU'
+                  AND project.expire = 'YOU_XIAO'
+                  AND (project.renewal =0 OR project.renewal IS NULL)
+                  AND project.source_id IS NULL
+                  AND project.project_type IN ( 'DAN_YI_FEI_TOU_BIAO_XIANG_MU', 'DAN_YI_TOU_BIAO_XIANG_MU' )
+                  AND project.performance_confirm_time IS NOT NULL
+                  AND project.contract_amount IS NOT NULL
+                  AND (project.company_id IN (SELECT dept_id FROM sys_dept WHERE  ancestors like concat('%', sd.dept_id, '%') AND status = 0 AND del_flag = 0 )OR project.company_id = sd.dept_id)
+            ) AS total
+        FROM
+            sys_dept sd
+        WHERE
+            sd.parent_id = #{recordId}
+          AND sd.STATUS = 0
+          AND sd.del_flag = 0
+          AND (SELECT COUNT(dept_id) FROM sys_dept WHERE del_flag = '0' AND parent_id = sd.dept_id) >0
+        GROUP BY
+            dept_id,
+            dept_name
+        ORDER BY
+            total DESC
+    </select>
+
+    <select id="getProjectYETAI" resultType="java.util.Map">
+        select
+            sdd.dict_label as label,
+            sdd.dict_value as value,
+            COALESCE(SUM(project.contract_amount),0) AS contractAmount
+        from
+          sys_dict_data sdd
+          left join (
+            SELECT
+              project.*
+            FROM
+              biz_project project
+            WHERE
+                1 = 1
+                <!-- 是否有效：有效 -->
+                AND project.expire = 'YOU_XIAO'
+
+                <!--剔除补录项目且计算业绩为否的项目 -->
+                and project.is_count_performance != 'FOU'
+
+                <!-- 项目类型：单一投标和单一非投标 -->
+                AND project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+
+                <!-- 归属单位：选择的业务架构 -->
+                and (
+                    project.company_id IN (
+                      SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                    )
+                    OR
+                    project.company_id = #{recordId}
+                )
+
+                <if test="zaiguan == 1">
+                    <!-- 项目状态：在管 -->
+                    and project.service_status = 'ZAI_GUAN'
+                </if>
+
+                <if test="zaiguan == 2">
+                    <!--是否续签项目：否-->
+                    AND project.in_stock = 'FOU'
+
+                    <!-- 项目状态：去掉 已废止 状态数据 -->
+                    AND project.service_status != 'YI_FEI_ZHI'
+
+                    <!-- 业绩确认时间：选择的年份 -->
+                    and DATE_FORMAT(project.performance_confirm_time, '%Y') = #{currYear}
+
+                    <!-- 项目流程：完成业绩确认节点 -->
+                    and project.id in (
+                    select
+                    step.project_id id
+                    from
+                    biz_project_step step
+                    join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                    where
+                    step.`status` = 1
+                    AND stepmenu.`code` = 'yjqrsp'
+                    )
+                </if>
+          ) project on project.business_type = sdd.dict_value
+          where
+            sdd.dict_type  = #{dictTypeName}
+        GROUP BY
+            sdd.dict_label ,
+            sdd.dict_value
+        ORDER BY contractAmount DESC
+    </select>
+    <select id="getActualSigning" resultType="java.util.Map">
+        select
+            ifnull(b.contractAmount,0) contractAmount,
+            ifnull(b.contractAnnualAmount,0) contractAnnualAmount,
+            ifnull(b.annualConversionAmount,0) as annualConversionAmount,
+            a.date
+        from
+            (
+                SELECT CONCAT(#{currYear},'-01') AS date UNION
+                SELECT CONCAT(#{currYear},'-02') AS date UNION
+                SELECT CONCAT(#{currYear},'-03') AS date UNION
+                SELECT CONCAT(#{currYear},'-04') AS date UNION
+                SELECT CONCAT(#{currYear},'-05') AS date UNION
+                SELECT CONCAT(#{currYear},'-06') AS date UNION
+                SELECT CONCAT(#{currYear},'-07') AS date UNION
+                SELECT CONCAT(#{currYear},'-08') AS date UNION
+                SELECT CONCAT(#{currYear},'-09') AS date UNION
+                SELECT CONCAT(#{currYear},'-10') AS date UNION
+                SELECT CONCAT(#{currYear},'-11') AS date UNION
+                SELECT CONCAT(#{currYear},'-12') AS date
+            )a
+        left join
+        (
+            select
+                sum(pro.contractAmount) contractAmount,
+                sum(pro.contractAnnualAmount) contractAnnualAmount,
+                pro.date,
+                sum(pro.currentConvertIncome) annualConversionAmount
+            from (
+                select
+                    project.contract_amount as contractAmount ,
+                    project.contract_annual_amount as contractAnnualAmount,
+                    DATE_FORMAT(project.performance_confirm_time,"%Y-%m") as date,
+                    project.annual_conversion_amount currentConvertIncome,
+                    project.id
+                from
+                  biz_project project
+                where
+                    1=1
+                    <!-- 项目流程：完成业绩确认节点 -->
+                    and project.id in (
+                        select
+                          step.project_id id
+                        from
+                          biz_project_step step
+                          join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                        where
+                          step.`status` = 1
+                          AND stepmenu.`code` = 'yjqrsp'
+                    )
+                    <!-- 业绩确认时间：选择的年份 -->
+                    AND project.performance_confirm_time IS NOT NULL
+                    AND DATE_FORMAT( project.performance_confirm_time, '%Y' ) = #{currYear}
+                    <!-- 是否有效：有效 -->
+                    AND project.expire = 'YOU_XIAO'
+                    <!--剔除补录项目且计算业绩为否的项目 -->
+                    and project.is_count_performance != 'FOU'
+                    <!-- 项目类型：单一投标和单一非投标 -->
+                    AND project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+                    <!-- 项目状态：剔除已废止 -->
+                    and project.service_status != 'YI_FEI_ZHI'
+                    <!-- 归属单位：选择的业务架构 -->
+                    and (
+                        project.company_id IN (
+                        SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                        )
+                        OR
+                        project.company_id = #{recordId}
+                    )
+                GROUP BY project.id
+            )  as pro
+            GROUP BY pro.date
+        ) b
+        on a.date = b.date
+        ORDER BY date
+    </select>
+    <select id="getBudget" resultType="java.util.Map">
+        SELECT
+            d.field_key fieldKey,
+            d.field_name fieldName,
+            d.amount fieldValue
+        FROM
+          biz_budget_indicator_data d
+          JOIN biz_budget_indicator_config config ON config.`code` = d.`code`
+        where
+            config.is_target = 1
+            and d.field_name != ''
+            and d.field_name is not null
+            and d.field_year = #{currYear}
+            AND d.company_id = #{recordId}
+        GROUP BY field_key
+        order by d.field_sort asc
+    </select>
+    <select id="getActual" resultType="java.util.Map">
+        select
+            IFNULL(ROUND(sum(htzje),2),'0.00') contractAmount,
+            IFNULL(ROUND(sum(htndje),2),'0.00') contractAnnualAmount,
+            IFNULL(ROUND(sum(zdtzhtje),2),'0.00') zdtzhtje
+        from (
+            SELECT
+            <!-- 非总部 -->
+            <if test="currLevel != 1">
+                project.id,
+                (
+                    IFNULL(
+                    (
+                        case when
+                            (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  zjec.yes_incremental = 1)
+                            or
+                            (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and zjec.no_incremental = 1)
+                        then bpad.incremental_amount
+                        else 0 end
+                    ),0)
+                    +
+                    IFNULL(
+                    (
+                      case when
+                        (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  zjec.yes_keep = 1)
+                        or
+                        (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and zjec.no_keep = 1)
+                      then bpad.keep_amount
+                      else 0 end
+                    ),0)
+                    +
+                    IFNULL(
+                    (
+                        case when
+                        (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  zjec.yes_add = 1)
+                        or
+                        (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and zjec.no_add = 1)
+                        then bpad.add_amount
+                        else 0 end
+                    ),0)
+                ) * (bpad.contract_amount_rate / 100) as  htzje,
+                (
+                    IFNULL(
+                    (
+                        case when
+                        (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  ndjec.yes_incremental = 1)
+                        or
+                        (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and ndjec.no_incremental = 1)
+                        then bpad.incremental_amount_year
+                        else 0 end
+                    ),0)
+                    +
+                    IFNULL(
+                    (
+                        case when
+                        (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  ndjec.yes_keep = 1)
+                        or
+                        (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and ndjec.no_keep = 1)
+                        then bpad.keep_amount_year
+                        else 0 end
+                    ),0)
+                    +
+                    IFNULL(
+                    (
+                        case when
+                        (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  ndjec.yes_add = 1)
+                        or
+                        (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and ndjec.no_add = 1)
+                        then bpad.add_amount_year
+                        else 0 end
+                    ),0)
+                ) * (bpad.contract_amount_rate / 100) as htndje,
+                (
+                IFNULL(
+                (
+                    case when
+                    (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  ndjec.yes_incremental = 1)
+                    or
+                    (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and ndjec.no_incremental = 1)
+                    then bpad.incremental_amount_year
+                    else 0 end
+                ),0)
+                +
+                IFNULL(
+                (
+                case when
+                    (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  ndjec.yes_keep = 1)
+                    or
+                    (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and ndjec.no_keep = 1)
+                    then bpad.keep_amount_year
+                    else 0 end
+                ),0)
+                +
+                IFNULL(
+                (
+                case when
+                    (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  ndjec.yes_add = 1)
+                    or
+                    (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and ndjec.no_add = 1)
+                    then bpad.add_amount_year
+                    else 0 end
+                ),0)
+                )  * (bpad.leading_expansion_rate / 100) as zdtzhtje
+            </if>
+            <!-- 总部 -->
+            <if test="currLevel == 1">
+                project.id,
+                (
+                    IFNULL(
+                    (
+                    case when
+                    (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  zjec.yes_incremental = 1)
+                    or
+                    (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and zjec.no_incremental = 1)
+                    then bpad.incremental_amount
+                    else 0 end
+                ),0)
+                +
+                IFNULL(
+                (
+                    case when
+                    (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  zjec.yes_keep = 1)
+                    or
+                    (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and zjec.no_keep = 1)
+                    then bpad.keep_amount
+                    else 0 end
+                ),0)
+                +
+                IFNULL(
+                (
+                    case when
+                    (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  zjec.yes_add = 1)
+                    or
+                    (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and zjec.no_add = 1)
+                    then bpad.add_amount
+                    else 0 end
+                ),0)
+                )  as  htzje,
+                (
+                IFNULL(
+                (
+                    case when
+                    (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  ndjec.yes_incremental = 1)
+                    or
+                    (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and ndjec.no_incremental = 1)
+                    then bpad.incremental_amount_year
+                    else 0 end
+                ),0)
+                +
+                IFNULL(
+                (
+                case when
+                    (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  ndjec.yes_keep = 1)
+                    or
+                    (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and ndjec.no_keep = 1)
+                    then bpad.keep_amount_year
+                    else 0 end
+                ),0)
+                +
+                IFNULL(
+                (
+                    case when
+                    (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  ndjec.yes_add = 1)
+                    or
+                    (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and ndjec.no_add = 1)
+                    then bpad.add_amount_year
+                    else 0 end
+                ),0)
+                ) as htndje,
+                (
+                    IFNULL(
+                    (
+                    case when
+                    (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  ndjec.yes_incremental = 1)
+                    or
+                    (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and ndjec.no_incremental = 1)
+                    then bpad.incremental_amount_year
+                else 0 end
+                ),0)
+                +
+                IFNULL(
+                (
+                    case when
+                    (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  ndjec.yes_keep = 1)
+                    or
+                    (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and ndjec.no_keep = 1)
+                    then bpad.keep_amount_year
+                    else 0 end
+                ),0)
+                +
+                IFNULL(
+                (
+                    case when
+                    (project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU' and  ndjec.yes_add = 1)
+                    or
+                    (project.project_type = 'DAN_YI_FEI_TOU_BIAO_XIANG_MU' and ndjec.no_add = 1)
+                    then bpad.add_amount_year
+                    else 0 end
+                ),0)
+                ) as zdtzhtje
+            </if>
+            FROM
+                biz_project project
+                LEFT JOIN biz_budget_performance_allocation_data bpad ON bpad.project_id = project.id and deleted = 0
+                  AND bpad.project_type = project.project_type
+                AND bpad.field_year = #{currYear}
+                LEFT JOIN biz_budget_statistical_method_config zjec ON zjec.field_year = #{currYear} AND zjec.field_key = 'HTZJE'
+                LEFT JOIN biz_budget_statistical_method_config ndjec ON ndjec.field_year = #{currYear} AND ndjec.field_key = 'HTNDJE'
+            WHERE
+
+                <!-- 是否有效：有效 -->
+                project.expire = 'YOU_XIAO'
+
+                <!--剔除补录项目且计算业绩为否的项目 -->
+                and project.is_count_performance != 'FOU'
+
+                <!-- 项目类型：单一投标和单一非投标 -->
+                AND project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+
+                <!-- 项目状态：去掉 已废止 状态数据 -->
+                AND project.service_status != 'YI_FEI_ZHI'
+
+                <!-- 业绩确认时间：选择的年份 -->
+                and DATE_FORMAT(project.performance_confirm_time, '%Y') = #{currYear}
+
+                <!-- 项目流程：完成业绩确认节点 -->
+                and project.id in (
+                    select
+                      step.project_id id
+                    from
+                      biz_project_step step
+                      join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                    where
+                      step.`status` = 1
+                      AND stepmenu.`code` = 'yjqrsp'
+                )
+
+                <!-- 拓展单位： 选择的业务架构 -->
+                <if test="currLevel != 1 ">
+                    AND bpad.company_id = #{recordId}
+                </if>
+
+            GROUP BY project.id
+        ) as  ccc
+    </select>
+    <select id="getActualValid" resultType="java.lang.Integer">
+        SELECT
+            count(1) as total
+        FROM
+            biz_project project
+        WHERE
+            project.expire in ('YOU_XIAO')
+            <!--是否续签项目：否-->
+            and project.in_stock = 'FOU'
+            <!--剔除补录项目且计算业绩为否的项目 -->
+            and project.is_count_performance != 'FOU'
+            <!--#项目类型 -->
+            AND project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+            <!-- 项目流程：完成项目评审/标书审核节点 -->
+            AND project.id in (
+                select
+                  step.project_id id
+                from
+                  biz_project_step step
+                  join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                where
+                  step.`status` = 1 AND stepmenu.`code` = 'xmps' and DATE_FORMAT(step.handle_time , '%Y') = #{currYear}
+            )
+            <!--#归属单位：选择的业务架构 -->
+            and (
+            project.company_id IN (
+            SELECT dept_id FROM sys_dept WHERE ancestors like concat('%',#{recordId}, '%') AND status = 0 AND del_flag = 0
+            )
+            OR
+            project.company_id = #{recordId}
+            )
+    </select>
+    <select id="getExpansionMode" resultType="java.util.Map">
+        SELECT
+            a.dict_value as value,
+            a.dict_label as name,
+            IFNULL(b.total,0) as total,
+            IFNULL(b.contractAmount,0) as  contractAmount
+        FROM (
+            SELECT
+                dict_value, dict_label,dict_type
+            FROM
+                sys_dict_data
+            WHERE
+                dict_type = #{type}
+
+        ) a
+        left join (
+            SELECT
+                count( 1 ) AS total,
+                <if test="type == 'TUO_ZHAN_MO_SHI'">
+                    project.expansion_mode dict_value,
+                </if>
+                <if test="type == 'YE_WU_BAN_KUAI'">
+                    project.business_segments dict_value,
+                </if>
+                IFNULL( ROUND(sum( project.contract_amount ),2 ), 0 ) AS contractAmount
+            FROM
+                biz_project project
+            WHERE
+                DATE_FORMAT(project.performance_confirm_time, '%Y') = #{currYear}
+
+                and project.id in (
+                    select
+                        step.project_id id
+                    from
+                        biz_project_step step
+                        join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                    where
+                        step.`status` = 1
+                        AND stepmenu.`code` = 'yjqrsp'
+                )
+
+                AND project.in_stock = 'FOU'
+
+                and project.is_count_performance != 'FOU'
+
+                AND project.expire = 'YOU_XIAO'
+
+                and project.service_status != 'YI_FEI_ZHI'
+
+                AND project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+
+                <!-- 归属单位：选择的业务架构 -->
+                and (
+                    project.company_id IN (
+                        SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                    )
+                    OR
+                    project.company_id = #{recordId}
+                )
+
+            <if test="type == 'TUO_ZHAN_MO_SHI'">
+                group by project.expansion_mode
+            </if>
+            <if test="type == 'YE_WU_BAN_KUAI'">
+                group by project.business_segments
+            </if>
+
+        )b
+        on a.dict_value = b.dict_value
+    </select>
+    <select id="getBidding" resultType="java.util.Map">
+        SELECT
+            count( 1 ) AS total, 
+            IFNULL(
+                SUM(
+                    CASE
+                    WHEN
+                        project.bided_result = 'YI_ZHONG_BIAO'
+                        and
+                        project.id in (
+                            select
+                                step.project_id id
+                            from
+                                biz_project_step step
+                                join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                            where
+                                step.`status` = 1
+                                AND stepmenu.`code` = 'tbfp'
+                        )
+                    THEN 1
+                    ELSE 0
+                    END
+                ), 0 ) AS zhongbiao,
+            IFNULL(
+                SUM(
+                    CASE
+                    WHEN
+                        project.bided_result = 'YI_ZHONG_BIAO'
+                        and
+                        project.id in (
+                            select
+                                step.project_id id
+                            from
+                                biz_project_step step
+                                join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                            where
+                                step.`status` = 1
+                                AND stepmenu.`code` = 'tbfp'
+                        )
+                    THEN project.contract_amount
+                    ELSE 0
+                    END
+                ), 0 ) AS contractAmount
+        FROM
+            biz_project project
+        WHERE
+            project.expire = 'YOU_XIAO'
+            AND project.project_type = 'DAN_YI_TOU_BIAO_XIANG_MU'
+            <!--剔除补录项目且计算业绩为否的项目 -->
+            and project.is_count_performance != 'FOU'
+            and (
+                project.company_id IN (
+                    SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                )
+                OR
+                project.company_id = #{recordId}
+            )
+
+            <if test="isCurrentYear">
+                AND date_format(project.biding_opentime, '%Y%m%d') &gt;= DATE(CONCAT(#{currYear}, '-01-01'))
+                AND date_format(project.biding_opentime, '%Y%m%d') &lt;= date_format(NOW(), '%Y%m%d')
+            </if>
+            <if test="!isCurrentYear">
+                AND date_format(project.biding_opentime, '%Y') = #{currYear}
+            </if>
+
+            <if test="zgType == 2">
+                AND project.in_stock = 'SHI'
+            </if>
+            <if test="zgType == 3">
+                AND project.in_stock = 'FOU'
+            </if>
+
+            <if test="tbType == 2">
+                AND project.expansion_mode = 'WAI_BU_TOU_BIAO'
+            </if>
+            <if test="tbType == 3">
+                AND project.expansion_mode = 'ZHONG_SHI_YOU_TOU_BIAO'
+            </if>
+
+            <if test="zbType == 2">
+                AND project.biding_mode = 'GONG_KAI_ZHAO_BIAO'
+            </if>
+            <if test="zbType == 3">
+                AND project.biding_mode = 'YAO_QING_ZHAO_BIAO'
+            </if>
+            <if test="zbType == 4">
+                AND project.biding_mode = 'JING_ZHENG_XING_TAN_PAN'
+            </if>
+            <if test="zbType == 5">
+                AND project.biding_mode = 'DAN_YI_LAI_YUAN'
+            </if>
+            <if test="zbType == 6">
+                AND project.biding_mode = 'XUN_JIA'
+            </if>
+
+    </select>
+
+    <!--  迭代3修改
+        1、项目状态：在管
+        2、业绩确认时间：选择的年份（删除统计条件）
+        3、归属单位：选择的业务架构
+        4、是否续签项目：否（删除统计条件）
+        5、是否有效：有效
+        6、去除续签和重新投标生成的项目（删除统计条件）
+        7、项目类型：单一投标和单一非投标 -->
+    <select id="getInTubeProjectTotal" resultType="java.lang.Integer">
+        SELECT
+          count( 1 )
+        FROM
+          biz_project project
+        WHERE
+            <!-- 项目状态：在管 -->
+            project.service_status = 'ZAI_GUAN'
+            <!-- 是否有效：有效 -->
+            AND project.expire = 'YOU_XIAO'
+            <!-- 项目类型：单一投标和单一非投标 -->
+            AND project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+            <!-- 归属单位：选择的业务架构 -->
+            and (
+                project.company_id IN (
+                  SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                )
+                OR
+                project.company_id = #{recordId}
+            )
+
+    </select>
+
+    <!--  迭代3修改
+        1、项目状态：在管
+        2、业绩确认时间：选择的年份（删除统计条件）
+        3、归属单位：选择的业务架构
+        4、是否续签项目：否（删除统计条件）
+        5、是否有效：有效
+        6、去除续签和重新投标生成的项目（删除统计条件）
+        7、项目类型：单一投标和单一非投标
+        统计：项目信息-建筑面积 -->
+    <select id="getWaiProjectTotal" resultType="java.lang.String">
+        select
+          ifnull(sum( project.construction_area),0)
+        from
+          biz_project project
+        WHERE
+        <!-- 项目状态：在管 -->
+        project.service_status = 'ZAI_GUAN'
+        <!-- 是否有效：有效 -->
+        AND project.expire = 'YOU_XIAO'
+        <!-- 项目类型：单一投标和单一非投标 -->
+        AND project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+        <!-- 归属单位：选择的业务架构 -->
+        and (
+            project.company_id IN (
+              SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+            )
+            OR
+            project.company_id = #{recordId}
+        )
+
+    </select>
+
+    <!--  迭代3新增
+        1、业绩确认时间：选择的年份
+        2、项目流程：完成业绩确认节点
+        3、归属单位：选择的业务架构
+        4、是否续签项目：否
+        5、是否有效：有效
+        6.剔除已废止
+        统计：项目信息-建筑面积 -->
+    <select id="getNewWaiProjectTotal" resultType="java.lang.String">
+        select
+            ifnull(sum( project.construction_area),0)
+        from
+            biz_project project
+        WHERE
+            <!-- 是否有效：有效 -->
+            project.expire = 'YOU_XIAO'
+            <!-- 是否续签项目：否 -->
+            AND project.in_stock = 'FOU'
+            <!--剔除补录项目且计算业绩为否的项目 -->
+            and project.is_count_performance != 'FOU'
+            <!-- 业绩确认时间：选择的年份 -->
+            and DATE_FORMAT(project.performance_confirm_time, '%Y') = #{currYear}
+            <!-- 项目状态：去掉 已废止 状态数据（新增统计条件） -->
+            AND project.service_status != 'YI_FEI_ZHI'
+            <!-- 项目流程：完成业绩确认节点 -->
+            and project.id in (
+                select
+                  step.project_id id
+                from
+                  biz_project_step step
+                  join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                where
+                  step.`status` = 1
+                  AND stepmenu.`code` = 'yjqrsp'
+            )
+            <!-- 归属单位：选择的业务架构 -->
+            and (
+                project.company_id IN (
+                  SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                )
+                OR
+                project.company_id = #{recordId}
+            )
+
+    </select>
+
+    <!-- 迭代3修改
+        1、项目状态：去掉 已终止 状态数据（删除统计条件）
+        2、业绩确认时间：选择的年份
+        3、归属单位：选择的业务架构（删除统计条件）
+        4、项目流程：完成业绩确认节点
+        5、是否续签项目：否
+        6、是否有效：有效
+        7、去除续签和重新投标生成的项目（删除统计条件）
+        8、项目类型：单一投标和单一非投标
+        9、拓展单位： 选择的业务架构（新增统计条件）
+        10、项目状态：去掉 已废止 状态数据（新增统计条件） -->
+    <select id="getSignProjectTotal" resultType="java.lang.Integer">
+        SELECT
+          count( 1 )
+        FROM
+          biz_project project
+        WHERE
+        <!-- 是否有效：有效 -->
+        project.expire = 'YOU_XIAO'
+        <!-- 是否续签项目：否 -->
+        AND project.in_stock = 'FOU'
+        <!--剔除补录项目且计算业绩为否的项目 -->
+        and project.is_count_performance != 'FOU'
+        <!-- 项目状态：去掉 已废止 状态数据（新增统计条件） -->
+        AND project.service_status != 'YI_FEI_ZHI'
+        <!-- 项目类型：单一投标和单一非投标 -->
+        AND project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+        <!-- 业绩确认时间：选择的年份 -->
+        and DATE_FORMAT(project.performance_confirm_time, '%Y') = #{currYear}
+        <!-- 项目流程：完成业绩确认节点 -->
+        and project.id in (
+            select
+              step.project_id id
+            from
+              biz_project_step step
+              join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+            where
+              step.`status` = 1
+              AND stepmenu.`code` = 'yjqrsp'
+        )
+        <!-- 归属单位：选择的业务架构 -->
+        and (
+            project.company_id IN (
+            SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+            )
+            OR
+            project.company_id = #{recordId}
+        )
+
+    </select>
+
+    <!-- 迭代3修改
+        1、项目流程：完成业绩确认节点
+        2、业绩确认时间：选择的年份
+        3、是否续签项目：是
+        4、拓展单位：选择的业务架构
+        5、是否有效：有效
+        6、剔除已废止
+        7、包括续签和重新投标生成的项目
+        统计：项目数量 -->
+    <select id="getSignRenewalProjectTotal" resultType="java.lang.Integer">
+        SELECT
+            count( 1 )
+        FROM
+            biz_project project
+        WHERE
+            <!-- 是否有效：有效 -->
+            project.expire = 'YOU_XIAO'
+            <!-- 是否续签项目：是 -->
+            AND project.in_stock = 'SHI'
+            <!--剔除补录项目且计算业绩为否的项目 -->
+            and project.is_count_performance != 'FOU'
+            <!-- 剔除已废止 -->
+            AND project.service_status != 'YI_FEI_ZHI'
+            <!-- 业绩确认时间：选择的年份 -->
+            and DATE_FORMAT(project.performance_confirm_time, '%Y') = #{currYear}
+            <!-- 项目流程：完成业绩确认节点 -->
+            and project.id in (
+                select
+                    step.project_id id
+                from
+                  biz_project_step step
+                  join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                where
+                  step.`status` = 1
+                  AND stepmenu.`code` = 'yjqrsp'
+            )
+            <!-- 归属单位：选择的业务架构 -->
+            and (
+                project.company_id IN (
+                SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                )
+                OR
+                project.company_id = #{recordId}
+            )
+    </select>
+
+
+    <!-- 迭代3修改
+        1、项目状态：去除 已终止 状态数据（删除统计条件）
+        2、业绩确认时间：选择的年份
+        3、项目流程：完成业绩确认节点
+        4、拓展单位：选择的业务架构
+        5、是否续签项目：否
+        6、是否有效：有效
+        7、去除续签和重新投标生成的项目（删除统计条件）
+        8、项目类型：单一投标和单一非投标
+        9、项目状态：去掉 已废止 状态数据（新增统计条件）
+        统计：业绩确认节点-当年转化金额 -->
+    <select id="getContractConversion" resultType="java.lang.String">
+<!--        select ifnull(sum( project.annual_conversion_amount),0) from biz_project project-->
+<!--        LEFT JOIN biz_project_step bps ON bps.project_id = project.id-->
+<!--        where-->
+<!--        project.annual_conversion_amount is not null-->
+<!--        AND bps.`status` = 1-->
+<!--        AND bps.step_menu_id in (select id from biz_project_step_menu where parent_id in (select id from-->
+<!--        biz_project_step_menu where `code` in('yjqr')))-->
+<!--        AND date_format( project.performance_confirm_time, '%Y' ) = #{currYear}-->
+<!--        <include refid="selectDataRole"></include>-->
+        SELECT
+        ifnull(sum( project.annual_conversion_amount * project.assignment_rate /100),0) AS annualConversionAmount
+        from
+        (
+        SELECT
+        project.annual_conversion_amount,
+        if(SUM(assignment_rate)>100,100,SUM(assignment_rate)) assignment_rate,
+        project.id
+        FROM
+        biz_project project
+        LEFT JOIN biz_project_step bps ON bps.project_id = project.id
+        LEFT JOIN biz_project_achievement bpa ON bpa.project_id = project.id
+        WHERE
+        project.performance_confirm_time IS NOT NULL
+        AND bps.`status` = 1
+        AND bps.step_menu_id in (select id from biz_project_step_menu where parent_id in (select id from
+        biz_project_step_menu where `code` in('yjqrsp')))
+        AND DATE_FORMAT( project.performance_confirm_time, '%Y' ) = #{currYear}
+        <!-- 拓展单位：选择的业务架构 -->
+        <if test="recordId != null and recordId != ''">
+        and project.id in (
+            select project_id from biz_project_achievement where expand_company_id = #{recordId}
+        )
+        </if>
+        AND project.in_stock = 'FOU'
+        AND project.expire = 'YOU_XIAO'
+        AND project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+        <!-- 剔除已废止 -->
+        AND project.service_status != 'YI_FEI_ZHI'
+        GROUP BY project.id)as project
+    </select>
+
+    <select id="getContractTotal" resultType="java.util.Map">
+        select
+            IFNULL(ROUND(sum(zje),2),'0.00') zzje,
+            IFNULL(ROUND(sum(ndzje),2),'0.00') nndzje,
+            IFNULL(ROUND(sum(zhsr),2),'0.00') zzhsr
+        from (
+            SELECT
+                project.id,
+                project.contract_amount zje,
+                project.contract_annual_amount ndzje,
+                project.annual_conversion_amount zhsr
+            FROM
+                biz_project project
+            WHERE
+                <!-- 是否有效：有效 -->
+                project.expire = 'YOU_XIAO'
+                <!--剔除补录项目且计算业绩为否的项目 -->
+                and project.is_count_performance != 'FOU'
+
+                <if test="type == 'FEI_XU_QIAN' ">
+                    <!-- 是否续签项目：否 -->
+                    AND project.in_stock = 'FOU'
+                    <!-- 项目类型：单一投标和单一非投标 -->
+                    AND project.project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+                </if>
+
+                <if test="type == 'XU_QIAN' ">
+                    <!-- 是否续签项目：是 -->
+                    AND project.in_stock = 'SHI'
+                </if>
+
+                <!-- 项目状态：去掉 已废止 状态数据 -->
+                AND project.service_status != 'YI_FEI_ZHI'
+
+                <!-- 业绩确认时间：选择的年份 -->
+                and DATE_FORMAT(project.performance_confirm_time, '%Y') = #{currYear}
+
+                <!-- 项目流程：完成业绩确认节点 -->
+                and project.id in (
+                    select
+                        step.project_id id
+                    from
+                        biz_project_step step
+                        join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                    where
+                        step.`status` = 1
+                        AND stepmenu.`code` = 'yjqrsp'
+                )
+
+                <!-- 归属单位：选择的业务架构 -->
+                and (
+                    project.company_id IN (
+                    SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                    )
+                    OR
+                    project.company_id = #{recordId}
+                )
+
+            GROUP BY project.id
+        ) as  ccc
+
+    </select>
+
+    <select id="getProjectTotal" resultType="java.util.Map">
+        select
+            IFNULL(sum(case
+                when
+                    date_format( project.create_time, '%Y' ) = #{currYear}
+                then 1
+                else 0
+            end),0) as xmxxzl,<!-- 创建时间：选择的年份 -->
+            IFNULL(sum(case
+                when
+                    project.id in (
+                        select
+                                step.project_id id
+                        from
+                                biz_project_step step
+                                join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                        where
+                                step.`status` = 1
+                                AND stepmenu.`code` = 'xmps'
+                    )
+                    and
+                    date_format( project.create_time, '%Y' ) = #{currYear}
+                then 1
+                else 0
+            end),0) as xmgjzl,<!-- 1、创建时间：选择的年份 2项目流程：完成项目评审节点 -->
+            IFNULL(sum(case
+                when
+                    project.id in (
+                        select
+                                step.project_id id
+                        from
+                                biz_project_step step
+                                join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                        where
+                                step.`status` = 1
+                                AND stepmenu.`code` = 'yjqrsp'
+                    )
+                    and
+                    date_format( project.performance_confirm_time, '%Y' ) = #{currYear}
+                    AND
+                    project.service_status != 'YI_FEI_ZHI'
+                then 1
+                else 0
+            end),0) as cgxmzl <!-- 1业绩确认时间：选择的年份 2项目流程 完成业绩确认节点 3剔除已废止 -->
+        from
+            biz_project project
+        where
+            <!-- 是否有效：有效 -->
+            project.expire = 'YOU_XIAO'
+            <!-- 项目类型：单一投标和单一非投标： -->
+            and project.project_type IN ('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+            <!--剔除补录项目且计算业绩为否的项目 -->
+            and project.is_count_performance != 'FOU'
+            <!-- 是否续签：否 -->
+            AND project.in_stock = 'FOU'
+            <!-- 归属单位：选择的业务架构 -->
+            and (
+                project.company_id IN (
+                  SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+                )
+                OR
+                project.company_id = #{recordId}
+            )
+    </select>
+    <select id="getProjectTotalGU" resultType="java.util.Map">
+        select
+            IFNULL(sum(case
+                when
+                    date_format( project.create_time, '%Y' ) = #{currYear}
+                then 1
+                else 0
+            end),0) as xmxxzl,<!-- 创建时间：选择的年份 -->
+            IFNULL(sum(case
+                when
+                    project.id in (
+                        select
+                                step.project_id id
+                        from
+                                biz_project_step step
+                                join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                        where
+                                step.`status` = 1
+                                AND stepmenu.`code` = 'xmps'
+                    )
+                    and
+                    date_format( project.create_time, '%Y' ) = #{currYear}
+                then 1
+                else 0
+            end),0) as xmgjzl,<!-- 1、创建时间：选择的年份 2项目流程：完成项目评审节点 -->
+            IFNULL(sum(case
+                when
+                    project.id in (
+                        select
+                                step.project_id id
+                        from
+                                biz_project_step step
+                                join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                        where
+                                step.`status` = 1
+                                AND stepmenu.`code` = 'xmjc'
+                    )
+                    and
+                    date_format( project.performance_confirm_time, '%Y' ) = #{currYear}
+                then 1
+                else 0
+            end),0) as cgxmzl <!-- 1、项目决策时间：选择的年份 2项目流程 完成项目决策节点 -->
+        from
+            biz_project project
+        where
+            <!-- 是否有效：有效 -->
+            project.expire = 'YOU_XIAO'
+            <!-- 项目类型：股权合作类： -->
+            and project.project_type = 'GU_QUAN_HE_ZUO_XIANG_MU'
+            <!-- 归属单位：选择的业务架构 -->
+            and (
+              project.company_id IN (
+                SELECT dept_id FROM sys_dept WHERE ancestors like concat('%', #{recordId}, '%') AND status = 0 AND del_flag = 0
+              )
+              OR
+              project.company_id = #{recordId}
+            )
+    </select>
+
+    <select id="getSuccessTotal" resultType="java.lang.Integer">
+        SELECT
+        count(DISTINCT project.id)
+        FROM
+        biz_project project , biz_project_step ps
+        WHERE
+        project.id=ps.project_id
+        and project.project_type IN
+        <foreach collection="projectType" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and ps.step_menu_id in (select id from biz_project_step_menu where parent_id in (select id from
+        biz_project_step_menu where `code` in
+        <foreach collection="stepMenuCode" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ))
+        and ps.`status` = 1
+        and date_format( project.performance_confirm_time, '%Y' ) = #{currYear}
+        <include refid="selectData"></include>
+        AND project.in_stock = 'FOU'
+        AND project.expire = 'YOU_XIAO'
+        AND project.source_id is null
+    </select>
+
+    <select id="getSuccessTotalGU" resultType="java.lang.Integer">
+        SELECT
+        count(DISTINCT project.id)
+        FROM
+        biz_project project , biz_project_step ps
+        WHERE
+        project.id=ps.project_id
+        and project.project_type IN
+        <foreach collection="projectType" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        and ps.step_menu_id in (select id from biz_project_step_menu where parent_id in (select id from
+        biz_project_step_menu where `code` in
+        <foreach collection="stepMenuCode" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+        ))
+        and ps.`status` = 1
+        and date_format( project.performance_confirm_time, '%Y' ) = #{currYear}
+        <include refid="selectData"></include>
+        AND project.expire = 'YOU_XIAO'
+        AND (project.renewal =0 OR project.renewal IS NULL)
+        AND project.source_id is null
+    </select>
+
+    <select id="getOneById" resultType="com.bytefinger.toutuo.board.domain.SysDept">
+        SELECT * FROM sys_dept WHERE dept_id = #{id}
+    </select>
+    <select id="getDeptPageByParentId" resultType="java.util.Map">
+        SELECT
+            sd.dept_id as 'recordId',
+            sd.dept_name as 'companyName',
+            sd.`level` as 'currLevel',
+            sd.parent_id as 'parentId',
+            sd2.dept_name as 'regionName'
+        FROM
+            sys_dept sd
+                LEFT JOIN sys_dept sd2
+                          ON sd.parent_id = sd2.dept_id
+        WHERE
+
+            sd.dept_type = 'CENG_JI' AND sd.status = 0 AND sd.del_flag = 0
+        <if test="params.tabKey == 2">
+            AND  sd.`level` = 3 AND sd.ancestors like concat('%',  #{params.recordId}, '%')
+        </if>
+        <if test="params.tabKey == 1">
+            AND sd.parent_id = #{params.recordId}
+        </if>
+        <if test="params.tabKey == 3">
+            AND (sd.ancestors like concat('%',  #{params.recordId}, '%')  OR sd.parent_id = #{params.recordId} )
+        </if>
+    </select>
+
+    <select id="getIndicatorDisplayLevelIds" resultType="java.lang.Long">
+        select
+            display_level_id
+        from
+            biz_indicator_display_level
+        where
+            deleted = 0
+            and field_key = #{fieldKey}
+    </select>
+
+    <select id="selectProjectPerformanceBl" resultType="java.lang.String">
+        -- 分子：单一投标/单一非投标  （项目来源是由 续签+重新投标 生成的），有效，年内完成结项   的数据
+        -- 分母：单一投标/单一非投标  （项目来源是由 续签+重新投标 生成的），有效，年内完成结项   的数据 +  年内完成 (已退场+已完结) 的操作
+        select
+          IFNULL(ROUND( d.a / d.b * 100 ,2),0.00) retentionRate
+        from
+            (
+            SELECT
+              sum(case
+                when
+                    id in (
+                    select
+                    step.project_id id
+                    from
+                    biz_project_step step
+                    join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                    where
+                    step.`status` = 1
+                    AND stepmenu.`code` = 'xmjxps'
+                    and DATE_FORMAT(step.handle_time, '%Y') = #{currYear}
+                    )
+                then 1
+                else 0
+                end) a ,-- 年内完成结项   的数据
+                sum(case
+                when
+                id in (
+                select
+                step.project_id id
+                from
+                biz_project_step step
+                join biz_project_step_menu stepmenu on step.step_menu_id = stepmenu.id
+                where
+                step.`status` = 1
+                AND stepmenu.`code` = 'xmjxps'
+                and DATE_FORMAT(step.handle_time, '%Y') = #{currYear}
+                )
+                or (
+                (service_status = 'YI_WAN_JIE' or service_status = 'YI_TUI_CHANG' )
+                and DATE_FORMAT(update_status_date , '%Y') = #{currYear}
+                )
+                then 1
+                else 0
+                end) b  -- 年内完成结项  +  年内完成 (已退场+已完结) 的操作
+            FROM
+              biz_project
+            WHERE
+                -- 有效
+                expire = 'YOU_XIAO'
+                <!--剔除补录项目且计算业绩为否的项目 -->
+                and is_count_performance != 'FOU'
+                -- 单一投标/单一非投标
+                and project_type in('DAN_YI_FEI_TOU_BIAO_XIANG_MU','DAN_YI_TOU_BIAO_XIANG_MU')
+                -- 项目来源是由 续签+重新投标 生成的）
+                and id in ( SELECT relevance_project_id FROM biz_project_extension WHERE process_mode IN ( 1, 2 ) AND process_state = 2 )
+
+                <!--#归属单位：选择的业务架构 -->
+                and (
+                company_id IN (
+                SELECT dept_id FROM sys_dept WHERE ancestors like concat('%',#{recordId}, '%') AND status = 0 AND del_flag = 0
+                )
+                OR
+                company_id = #{recordId}
+                )
+
+        ) d
+    </select>
+</mapper>

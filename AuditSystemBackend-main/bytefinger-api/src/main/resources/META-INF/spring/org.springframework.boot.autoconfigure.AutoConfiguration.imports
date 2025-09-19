@@ -1,0 +1,5 @@
+com.bytefinger.toutuo.api.biz.user.factory.RemoteUserFallbackFactory
+com.bytefinger.toutuo.api.system.log.factory.RemoteLogFallbackFactory
+com.bytefinger.toutuo.api.biz.rules.factory.RemoteRulesFallbackFactory
+com.bytefinger.toutuo.api.biz.project.factory.RemoteProjectServiceFallbackFactory
+com.bytefinger.toutuo.api.biz.company.factory.RemoteCompanyServiceFallbackFactory

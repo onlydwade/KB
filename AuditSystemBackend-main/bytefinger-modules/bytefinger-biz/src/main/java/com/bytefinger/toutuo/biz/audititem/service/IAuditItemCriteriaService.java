@@ -1,0 +1,1 @@
+package com.bytefinger.toutuo.biz.audititem.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.biz.audititem.domain.AuditItemCriteria;/** * <p> * 审计项目标准表 服务类 * </p> * * @author Jone * @since 2025-08-07 */public interface IAuditItemCriteriaService extends IService<AuditItemCriteria> {}

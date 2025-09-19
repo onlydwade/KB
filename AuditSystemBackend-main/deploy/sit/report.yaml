@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tt-sit-backend-report
+  namespace: tt-sit
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: tt-sit-backend-report
+    spec:
+      containers:
+      - name: tt-sit-backend-report
+        image: 10.0.1.135:8080/toutuo/tt_sit_backend_report:latest
+        ports:
+        - containerPort: 8205
+      imagePullSecrets:
+      - name: tt-sit-harbor
+      restartPolicy: Always
+  selector:
+    matchLabels:
+      app: tt-sit-backend-report

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytefinger.toutuo.biz.projectcompany.mapper.ProjectCompanyItemMapper">
+
+    <sql id="selectBaseData">
+        SELECT
+            DISTINCT item.*,company.name as companyName, company.company_biz_no as companyBizNo, company.company_no as companyNo
+        FROM
+        biz_project_company_item item
+        left join biz_project_company company on company.id = report.company_id
+        where 1=1
+        <if test="cm.companyName != null">
+            and company.name  like  '%${cm.companyName}%'
+        </if>
+    </sql>
+
+    <!-- 公司列表 -->
+    <select id="list" resultType="com.bytefinger.toutuo.biz.projectcompany.domain.ProjectCompanyItem">
+        <include refid="selectBaseData"></include>
+        <if test="ew.sqlSegment != '' ">
+            AND ${ew.sqlSegment}
+        </if>
+    </select>
+
+    <!-- 详情 -->
+    <select id="getById" resultType="com.bytefinger.toutuo.biz.projectcompany.domain.ProjectCompanyItem">
+        SELECT
+            DISTINCT item.*,company.name as companyName, company.company_biz_no as companyBizNo, company.company_no as companyNo
+        FROM
+            biz_project_company_item item
+            left join biz_project_company company on company.id = item.company_id
+        where 1=1 and item.id = #{id}
+    </select>
+
+</mapper>

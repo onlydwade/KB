@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytefinger.toutuo.biz.followlog.mapper.FollowLogMapper">
+
+    <sql id="selectFollowLogVo">
+        select id,
+               record_id        recordId,
+               follow_user_id   followUserId,
+               follow_time      followTime,
+               part_users       partUsers,
+               follow_type      followType,
+               address          address,
+               part_users_count partUsersCount,
+               follow_content   followContent,
+               follow_document  followDocument,
+               create_user_id   createUserId,
+               create_time      createTime,
+               update_user_id   updateUserId,
+               update_time      updateTime,
+               principal        principal,
+               principal_post   principalPost,
+               last_follow_time lastFollowTime,
+                visit_user_name visitUserName,
+                visit_time visitTime,
+                visit_type visitType,
+               #{tableName}     modelName
+        FROM biz_${tableName}_follow_log
+    </sql>
+
+    <select id="getById" parameterType="Long" resultType="com.bytefinger.toutuo.biz.followlog.domain.BizFollowLog">
+        <include refid="selectFollowLogVo"/>
+        WHERE
+        id = #{id}
+        AND deleted = 0
+    </select>
+
+    <select id="lastData" parameterType="Long" resultType="com.bytefinger.toutuo.biz.followlog.domain.BizFollowLog">
+        <include refid="selectFollowLogVo"/>
+        WHERE
+        deleted = 0
+        AND record_id = #{recordId}
+        ORDER BY create_time
+        DESC LIMIT 1
+    </select>
+
+    <select id="list" parameterType="com.bytefinger.toutuo.biz.followlog.domain.BizFollowLog"
+            resultType="com.bytefinger.toutuo.biz.followlog.domain.BizFollowLog">
+        <include refid="selectFollowLogVo"/>
+        WHERE
+        deleted = 0
+        <if test="ew.sqlSegment !='' ">
+            AND ${ew.sqlSegment}
+        </if>
+    </select>
+
+    <insert id="add" useGeneratedKeys="true" keyProperty="fe.id">
+        INSERT INTO biz_${tableName}_follow_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="fe.recordId != null">record_id,</if>
+            <if test="fe.followUserId != null">follow_user_id,</if>
+            <if test="fe.followTime != null">follow_time,</if>
+            <if test="fe.lastFollowTime != null">last_follow_time,</if>
+            <if test="fe.partUsers != null">part_users,</if>
+            <if test="fe.followType != null">follow_type,</if>
+            <if test="fe.address != null">address,</if>
+            <if test="fe.partUsersCount != null">part_users_count,</if>
+            <if test="fe.followContent != null">follow_content,</if>
+            <if test="fe.followDocument != null">follow_document,</if>
+            <if test="fe.createUserId != null">create_user_id,</if>
+            <if test="fe.updateUserId != null">update_user_id,</if>
+            <if test="fe.principal != null">principal,</if>
+            <if test="fe.principalPost != null">principal_post,</if>
+            <if test="fe.visitUserName != null">visit_user_name,</if>
+            <if test="fe.visitTime != null">visit_time,</if>
+            <if test="fe.visitType != null">visit_type,</if>
+            create_time,
+            update_time,
+            deleted,
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="fe.recordId != null">#{fe.recordId},</if>
+            <if test="fe.followUserId != null">#{fe.followUserId},</if>
+            <if test="fe.followTime != null">#{fe.followTime},</if>
+            <if test="fe.lastFollowTime != null">#{fe.lastFollowTime},</if>
+            <if test="fe.partUsers != null">#{fe.partUsers},</if>
+            <if test="fe.followType != null">#{fe.followType},</if>
+            <if test="fe.address != null">#{fe.address},</if>
+            <if test="fe.partUsersCount != null">#{fe.partUsersCount},</if>
+            <if test="fe.followContent != null">#{fe.followContent},</if>
+            <if test="fe.followDocument != null">#{fe.followDocument},</if>
+            <if test="fe.createUserId != null">#{fe.createUserId},</if>
+            <if test="fe.updateUserId != null">#{fe.updateUserId},</if>
+            <if test="fe.principal != null">#{fe.principal},</if>
+            <if test="fe.principalPost != null">#{fe.principalPost},</if>
+            <if test="fe.visitUserName != null">#{fe.visitUserName},</if>
+            <if test="fe.visitTime != null">#{fe.visitTime},</if>
+            <if test="fe.visitType != null">#{fe.visitType},</if>
+            NOW(),
+            NOW(),
+            0,
+        </trim>
+    </insert>
+
+    <update id="update" parameterType="com.bytefinger.toutuo.biz.followlog.domain.BizFollowLog">
+        update biz_${tableName}_follow_log
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="fe.followUserId != null">follow_user_id = #{fe.followUserId},</if>
+            <if test="fe.followTime != null">follow_time = #{fe.followTime},</if>
+            <if test="fe.partUsers != null">part_users = #{fe.partUsers},</if>
+            <if test="fe.followType != null">follow_type = #{fe.followType},</if>
+            <if test="fe.address != null">address = #{fe.address},</if>
+            <if test="fe.partUsersCount != null">part_users_count = #{fe.partUsersCount},</if>
+            <if test="fe.followContent != null">follow_content = #{fe.followContent},</if>
+            <if test="fe.followDocument != null">follow_document = #{fe.followDocument},</if>
+            <if test="fe.visitUserName != null">visit_user_name = #{fe.visitUserName},</if>
+            <if test="fe.visitTime != null">visit_time = #{fe.visitTime},</if>
+            <if test="fe.visitType != null">visit_type = #{fe.visitType},</if>
+            update_time = NOW(),
+            <if test="fe.updateUserId != null">update_user_id = #{fe.updateUserId},</if>
+            <if test="fe.principal != null">principal = #{fe.principal},</if>
+            <if test="fe.principalPost != null">principal_post = #{fe.principalPost},</if>
+        </trim>
+        where id = #{fe.id}
+    </update>
+
+    <update id="deleteByIds">
+        update biz_${tableName}_follow_log set deleted = 2 where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <select id="getEntityById" resultType="Date">
+        SELECT
+        <choose>
+            <when test="tableName == 'lead'">
+                CASE WHEN claim_time IS NULL THEN create_time ELSE claim_time END
+            </when>
+            <otherwise>
+                create_time
+            </otherwise>
+        </choose>
+        FROM biz_${tableName}
+        WHERE id = #{id}
+    </select>
+
+    <update id="updateEntityFollowTime">
+        update biz_${tableName}
+        set follow_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <select id="getFiles" resultType="String">
+        select follow_document
+        from biz_${tableName} _follow_log
+        where
+            deleted = 0
+        AND record_id = #{recordId}
+            and LENGTH (follow_document)
+           > 10
+    </select>
+
+</mapper>

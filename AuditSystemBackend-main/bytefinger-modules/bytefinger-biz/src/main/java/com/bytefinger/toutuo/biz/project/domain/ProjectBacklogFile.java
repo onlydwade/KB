@@ -1,0 +1,149 @@
+package com.bytefinger.toutuo.biz.project.domain;
+
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.bytefinger.common.core.domain.BaseEntity;
+import com.bytefinger.common.core.web.domain.vo.UserVO;
+import com.bytefinger.common.security.annotation.DataFillField;
+import com.bytefinger.common.security.annotation.Dict;
+import com.bytefinger.common.security.annotation.Excel;
+import com.bytefinger.common.security.enums.FillMethod;
+import com.bytefinger.toutuo.common.annotation.HistoryFieldLog;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
+import lombok.experimental.Accessors;
+
+import java.util.Date;
+
+/**
+ * <p>
+ * 项目补录附件
+ * </p>
+ *
+ * @author patrick
+ * @since 2023-01-31
+ */
+@Data
+@Accessors(chain = true)
+@TableName("biz_project_backlog_file")
+@ApiModel(value = "ProjectBacklogFile对象", description = "项目补录文件")
+public class ProjectBacklogFile extends BaseEntity {
+
+    /**
+     * 文件名
+     */
+    @ApiModelProperty(value = "文件名", hidden = false, required = false)
+    @TableField("document_name")
+    @HistoryFieldLog("文件名")
+    @Excel(name = "文件名")
+    private String documentName;
+
+    /**
+     * 文件后缀
+     */
+    @ApiModelProperty(value = "文件后缀", hidden = false, required = false)
+    @TableField("document_ext")
+    @HistoryFieldLog("文件后缀")
+    @Excel(name = "文件后缀")
+    private String documentExt;
+
+    /**
+     * 项目类型
+     */
+    @ApiModelProperty(value = "项目类型", hidden = false, required = false)
+    @TableField("project_type")
+    @HistoryFieldLog("项目类型")
+    @Dict(type = "XIANG_MU_LEI_XING")
+    @Excel(name = "项目类型")
+    private String projectType;
+
+    /**
+     * 项目id
+     */
+    @ApiModelProperty(value = "项目id", hidden = false, required = false)
+    @TableField("project_id")
+    @HistoryFieldLog("项目id")
+    @Excel(name = "项目id")
+    private Long projectId;
+
+    /**
+     * 文件模板id
+     */
+    @ApiModelProperty(value = "文件模板id", hidden = false, required = false)
+    @TableField("document_template_id")
+    @HistoryFieldLog("文件模板id")
+    @Excel(name = "文件模板id")
+    private Long documentTemplateId;
+
+    /**
+     * 项目步骤节点id
+     */
+    @ApiModelProperty(value = "项目步骤节点id", hidden = false, required = false)
+    @TableField("step_menu_id")
+    @HistoryFieldLog("项目步骤节点id")
+    @Excel(name = "项目步骤节点id")
+    private Long stepMenuId;
+
+    /**
+     * 项目步骤节点名称
+     */
+    @ApiModelProperty(value = "项目步骤节点名称", hidden = false, required = false)
+    @TableField(exist = false)
+    @HistoryFieldLog("项目步骤节点名称")
+    @Excel(name = "项目步骤节点名称")
+    private String stepMenuName;
+
+    /**
+     * 是否删除 0-否 2-是
+     */
+    @ApiModelProperty(value = "是否删除 0-否 2-是", hidden = false, required = false)
+    @TableField("deleted")
+    @HistoryFieldLog("是否删除 0-否 2-是")
+    @Excel(name = "是否删除 0-否 2-是")
+    private Integer deleted;
+
+    /**
+     * 文件对象 json 内容
+     */
+    @ApiModelProperty(value = "文件对象 json 内容", hidden = false, required = false)
+    @TableField("document_object")
+    @HistoryFieldLog("文件对象 json 内容")
+    @Excel(name = "文件对象 json 内容")
+    private String documentObject;
+
+    /**
+     * 创建人
+     */
+    @ApiModelProperty(value = "创建人", hidden = false, required = false)
+    @TableField(value = "create_user_id", fill = FieldFill.INSERT)
+    @Excel(name = "创建人", dataType = Excel.DataType.USER, sort = 39)
+    private Long createUserId;
+
+    @ApiModelProperty(value = "创建人信息", hidden = false, required = false)
+    @TableField(exist = false)
+    @DataFillField(dataField = "createUserId", fillMethod = FillMethod.USER)
+    private UserVO createUser;
+
+    /**
+     * 创建时间
+     */
+    @ApiModelProperty(value = "创建时间", hidden = false, required = false)
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
+    @Excel(name = "创建时间", sort = 40)
+    private Date createTime;
+
+    @ApiModelProperty(value = "文档模板名称", hidden = false, required = false)
+    @TableField(exist = false)
+    @HistoryFieldLog("文档模板名称")
+    @Excel(name = "文档模板名称")
+    private String documentTemplateName;
+
+
+    @ApiModelProperty(value = "项目名称", hidden = false, required = false)
+    @TableField(exist = false)
+    @HistoryFieldLog("项目名称")
+    private String projectName;
+
+}

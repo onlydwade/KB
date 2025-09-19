@@ -1,0 +1,69 @@
+# Credentials and Sensitive Information
+credentials.md
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Terraform
+Infrastructure/terraform-dev/.terraform/
+Infrastructure/terraform-dev/terraform.tfstate
+Infrastructure/terraform-dev/terraform.tfstate.backup
+# Infrastructure/terraform-dev/*.tfvars
+Infrastructure/terraform-dev/.terraform.lock.hcl
+
+# Environment Variables
+.env
+.env.local
+.env.production
+.env.development
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Generated
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Dependency directories
+node_modules/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp

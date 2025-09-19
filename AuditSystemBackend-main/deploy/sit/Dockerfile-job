@@ -1,0 +1,5 @@
+FROM 10.0.1.135:8080/base-images/openjdk:11-jre
+ADD bytefinger-modules/bytefinger-job/target/bytefinger-job.jar app.jar
+EXPOSE 8206
+ENTRYPOINT ["java","-jar","-Dfile.encoding=UTF-8","-Duser.timezone=GMT+08","-Dspring.profiles.active=sit","-Xms256m","/app.jar"]
+

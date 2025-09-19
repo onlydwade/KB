@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bytefinger.toutuo.biz.workbrief.mapper.WorkBriefMapper">
+
+    <select id="list" parameterType="com.bytefinger.toutuo.biz.workbrief.domain.WorkBrief"
+            resultType="com.bytefinger.toutuo.biz.workbrief.domain.WorkBrief">
+        SELECT
+        wb.*,
+        '' AS pushUserName,
+        sucre.realname AS createUserName,
+        '' AS updateUserName,
+        sd.dept_name AS deptName
+        FROM
+        biz_work_brief wb
+        JOIN sys_user sucre ON sucre.user_id = wb.create_user_id AND sucre.del_flag = 0
+        LEFT JOIN sys_dept sd ON sd.dept_id = wb.dept_id AND sd.del_flag = 0
+        WHERE
+        wb.deleted = 0
+        <if test="ew.sqlSegment !='' ">
+            AND ${ew.sqlSegment}
+        </if>
+
+        <choose>
+            <!-- 全部数据 -->
+            <when test="'SHOW_ALL' == cm.dataRole">
+            </when>
+            <otherwise>
+                AND wb.create_user_id = #{cm.userId}
+            </otherwise>
+        </choose>
+        GROUP BY wb.id order by wb.id desc
+    </select>
+
+    <select id="initTitle" resultType="com.bytefinger.toutuo.biz.workbrief.domain.WorkBrief">
+        SELECT wb.code,wb.title FROM biz_work_brief wb WHERE wb.deleted = 0 order by id desc limit 1
+    </select>
+
+    <select id="getOneByTitle" resultType="com.bytefinger.toutuo.biz.workbrief.domain.WorkBrief">
+        SELECT wb.* FROM biz_work_brief wb WHERE wb.deleted = 0 AND wb.title = #{title} limit 1
+    </select>
+
+    <select id="updateApprovalStatus">
+        UPDATE biz_work_brief SET approve_status = #{approveStatus} WHERE id =  #{id}
+    </select>
+
+<!--    1.推送给自己的简报；2.创建人为自己的简报，并且审批状态为不需要审批：100和审批成功：2的简报-->
+    <select id="pageNotify" parameterType="com.bytefinger.toutuo.biz.workbrief.domain.WorkBrief"
+            resultType="com.bytefinger.toutuo.biz.workbrief.domain.WorkBrief">
+        SELECT DISTINCT sd.dept_name,wb.id,wb.title,wb.push_time,sucre.realname AS createUserName FROM biz_work_brief wb
+        LEFT JOIN sys_dept sd ON sd.dept_id = wb.dept_id AND sd.del_flag = 0
+        JOIN sys_user sucre ON sucre.user_id = wb.create_user_id AND sucre.del_flag = 0
+        WHERE
+        wb.deleted = 0
+        <if test="ew.sqlSegment !='' ">
+            AND ${ew.sqlSegment}
+        </if>
+        AND approve_status IN(2,100)
+        <choose>
+            <!-- 全部数据 -->
+            <when test="'SHOW_ALL' == cm.dataRole">
+            </when>
+            <otherwise>
+                AND (
+                wb.create_user_id = #{cm.userId} OR wb.id in (
+                SELECT DISTINCT brief_id FROM biz_work_brief_push_user WHERE deleted = 0 AND (user_id = #{cm.userId} OR user_id = CONCAT('group_user_', #{cm.userId}))
+                ))
+            </otherwise>
+        </choose>
+        ORDER BY wb.create_time DESC
+    </select>
+
+
+    <select id="getGroupConfig" resultType="java.lang.Integer">
+        select config_value from sys_config where config_key = 'GROUP_CONFIG'
+    </select>
+
+    <select id="setGroupConfig">
+        update sys_config set config_value =#{configValue} where config_key = 'GROUP_CONFIG'
+    </select>
+
+
+    <delete id="updateReadInfo">
+        delete from sys_message where module_id = #{moduleId} and user_id = #{userId} and title = #{title}
+    </delete>
+</mapper>
