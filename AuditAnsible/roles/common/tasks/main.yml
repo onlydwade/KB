@@ -1,0 +1,28 @@
+# --- roles/common/tasks/main.yml ---
+# 負責系統初始化、複製腳本及安裝共同依賴。
+
+- name: Copy deployment scripts directory to remote host
+  ansible.builtin.copy:
+    src: "{{ scripts_src_path }}/"
+    dest: "{{ scripts_dest_path }}/"
+    owner: "{{ remote_user }}"
+    group: "{{ remote_user }}"
+    mode: '0644'
+
+- name: Ensure all shell scripts are executable
+  ansible.builtin.file:
+    path: "{{ scripts_dest_path }}/{{ item }}"
+    mode: '0755'
+  with_fileglob:
+    - "{{ scripts_src_path }}/*.sh"
+  loop_control:
+    label: "{{ item | basename }}"
+
+- name: Run system setup script to install dependencies
+  ansible.builtin.command:
+    cmd: ./install-ubuntu-setup.sh
+    chdir: "{{ scripts_dest_path }}"
+    creates: /usr/lib/jvm/java-11-openjdk-amd64
+  args:
+    # `creates` 參數用於實現冪等性，如果目標檔案已存在，則此任務會被跳過
+    creates: /usr/lib/jvm/java-11-openjdk-amd64

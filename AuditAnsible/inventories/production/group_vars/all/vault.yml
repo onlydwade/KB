@@ -1,0 +1,24 @@
+# --- inventories/production/group_vars/all/vault.yml ---
+# 存放敏感資訊，如密碼和 API Token。
+# !!! 重要：請在生成後，使用 `ansible-vault encrypt` 指令加密此檔案 !!!
+
+# Sudo 密碼，執行 playbook 時可透過 --ask-become-pass 傳入
+ansible_become_pass: '{{ sudo_password }}'
+
+# 用於從 GitHub clone 程式碼的 Personal Access Token
+github_token: 'github_pat_...'
+
+# Nacos 密碼
+nacos_password: 'nacos'
+
+# MySQL root 密碼
+mysql_root_password: 'root123'
+
+# AuditSystem 應用程式使用的 MySQL 使用者密碼
+mysql_password: 'audit123'
+
+# RabbitMQ 密碼
+rabbitmq_password: 'auditsystem123'
+
+# AuditSystem 應用程式管理員預設密碼
+app_admin_password: 'admin123'

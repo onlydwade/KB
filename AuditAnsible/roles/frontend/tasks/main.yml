@@ -1,0 +1,10 @@
+# --- roles/frontend/tasks/main.yml ---
+# 負責執行前端應用的部署腳本。
+
+- name: Run frontend deployment script
+  ansible.builtin.command:
+    cmd: ./deploy-frontend.sh
+    chdir: "{{ scripts_dest_path }}"
+    creates: /var/www/auditsystem/index.html
+  args:
+    creates: /var/www/auditsystem/index.html

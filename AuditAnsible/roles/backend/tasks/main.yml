@@ -1,0 +1,10 @@
+# --- roles/backend/tasks/main.yml ---
+# 負責執行後端微服務的部署腳本。
+
+- name: Run backend deployment script
+  ansible.builtin.command:
+    cmd: ./deploy-backend.sh
+    chdir: "{{ scripts_dest_path }}"
+    creates: /etc/systemd/system/auditsystem-gateway.service
+  args:
+    creates: /etc/systemd/system/auditsystem-gateway.service
