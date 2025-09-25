@@ -1,0 +1,39 @@
+---
+# Ansible 全域變數
+# 建議使用 `ansible-vault encrypt group_vars/all/main.yml` 來保護敏感資訊
+
+# --- 部署路徑設定 ---
+# 本地 AuditSystemVM 腳本目錄的名稱
+project_source_dir: "AuditSystemVM"
+# 遠端伺服器上存放腳本的目標目錄
+remote_deploy_path: "/opt/deploy"
+
+# --- 服務管理 ---
+# manage-services.sh 腳本要執行的動作 (例如: start, stop, restart, status)
+service_action: "start"
+
+# --- Git 倉庫設定 ---
+# 後端 Git 倉庫 URL (請根據實際情況修改)
+backend_repo_url: "https://github.com/GTI-CTU/AuditSystemBackend.git"
+# 前端 Git 倉庫 URL (請根據實際情況修改)
+frontend_repo_url: "https://github.com/GTI-CTU/AuditSystemFrontend.git"
+
+# --- 資料庫憑證 (請務必修改為安全密碼) ---
+# MySQL root 密碼
+db_root_password: "root123"
+# 應用程式資料庫使用者
+db_app_user: "mysqladmin"
+# 應用程式資料庫密碼
+db_app_password: "CHANGE_ME_PLEASE"
+
+# --- Nacos 憑證 ---
+# Nacos 管理員使用者
+nacos_user: "nacos"
+# Nacos 管理員密碼
+nacos_password: "nacos"
+
+# --- 應用程式管理員憑證 ---
+# AuditSystem 應用程式管理員使用者
+app_admin_user: "admin"
+# AuditSystem 應用程式管理員密碼
+app_admin_password: "admin123"
