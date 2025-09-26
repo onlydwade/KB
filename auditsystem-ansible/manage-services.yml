@@ -1,0 +1,46 @@
+# auditsystem-ansible/manage-services.yml
+---
+# 這個劇本對應您的 manage-services.sh。
+# 它可以接收變數來啟動、停止、重啟服務。
+
+- name: Manage All AuditSystem Services
+  hosts: auditsystem_servers
+  become: yes
+  vars:
+    # 預設行為是 'restarted'，可以從命令列透過 -e "service_state=started" 覆寫。
+    service_state: "restarted"
+
+    # 定義服務啟動/停止的順序，以確保依賴關係正確。
+    infrastructure_services:
+      - mysql
+      - redis-server
+      - rabbitmq-server
+    app_services:
+      - nacos
+      - auditsystem-auth
+      - auditsystem-system
+      - auditsystem-biz
+      - auditsystem-job
+      - auditsystem-report
+      - auditsystem-gateway
+    web_services:
+      - nginx
+
+  tasks:
+    - name: "Perform '{{ service_state }}' on infrastructure services"
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: "{{ service_state }}"
+      loop: "{{ infrastructure_services }}"
+
+    - name: "Perform '{{ service_state }}' on application services"
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: "{{ service_state }}"
+      loop: "{{ app_services }}"
+
+    - name: "Perform '{{ service_state }}' on web services"
+      ansible.builtin.service:
+        name: "{{ item }}"
+        state: "{{ service_state }}"
+      loop: "{{ web_services }}"

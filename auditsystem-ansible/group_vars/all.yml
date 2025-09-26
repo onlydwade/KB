@@ -1,0 +1,73 @@
+# auditsystem-ansible/group_vars/all.yml
+---
+# 這裡是存放所有通用變數的檔案。
+# 在這裡定義的值可以在所有 Playbook 和 Role 中被引用。
+# 最佳實踐：對於生產環境，請使用 Ansible Vault 來加密敏感資訊 (如密碼和 token)。
+
+# --- System Settings ---
+# 部署應用程式的基礎目錄
+app_base_dir: /opt/auditsystem
+# 執行部署及服務的系統使用者
+app_user: "{{ ansible_user }}" # 自動使用執行 Ansible 的使用者
+
+# --- Java Settings ---
+java_home_path: /usr/lib/jvm/java-11-openjdk-amd64
+
+# --- MySQL Settings ---
+mysql_root_password: "root123"
+mysql_db_nacos: "nacos"
+mysql_db_app: "bytefinger_toutuo"
+mysql_user_app: "auditsystem"
+mysql_password_app: "audit123"
+
+# --- RabbitMQ Settings ---
+rabbitmq_vhost: "auditsystem"
+rabbitmq_user: "auditsystem"
+rabbitmq_password: "auditsystem123"
+
+# --- Nacos Settings ---
+nacos_version: "2.2.0"
+nacos_download_url: "https://github.com/alibaba/nacos/releases/download/{{ nacos_version }}/nacos-server-{{ nacos_version }}.tar.gz"
+nacos_install_dir: "{{ app_base_dir }}/nacos-server"
+nacos_server_addr: "127.0.0.1:8848"
+nacos_namespace: "bytefinger-audit-local"
+nacos_console_user: "nacos" # Nacos 主控台登入帳號
+nacos_console_password: "nacos" # Nacos 主控台登入密碼
+
+# --- Application Git Repositories ---
+# 警告：將 personal access token 直接放在 Git URL 中有安全風險，建議使用 Vault 或其他安全方式。
+# 為了方便測試，暫時維持原樣。
+backend_repo_url: "https://github.com/GTI-CTU/AuditSystemBackend.git"
+frontend_repo_url: "https://github.com/GTI-CTU/AuditSystemFrontend.git"
+frontend_repo_branch: "dev-luis"
+
+# --- Application Deployment Settings ---
+# 後端微服務清單及其對應的設定
+backend_services:
+  - name: gateway
+    port: 8200
+    jar_name: bytefinger-gateway.jar
+    source_path: bytefinger-gateway/target
+  - name: auth
+    port: 8300
+    jar_name: bytefinger-auth.jar
+    source_path: bytefinger-auth/target
+  - name: system
+    port: 8400
+    jar_name: bytefinger-system.jar
+    source_path: bytefinger-modules/bytefinger-system/target
+  - name: biz
+    port: 8500
+    jar_name: bytefinger-biz.jar
+    source_path: bytefinger-modules/bytefinger-biz/target
+  - name: job
+    port: 8600
+    jar_name: bytefinger-job.jar
+    source_path: bytefinger-modules/bytefinger-job/target
+  - name: report
+    port: 8700
+    jar_name: bytefinger-report.jar
+    source_path: bytefinger-modules/bytefinger-report/target
+
+# 前端部署設定
+frontend_web_root: "/var/www/auditsystem"

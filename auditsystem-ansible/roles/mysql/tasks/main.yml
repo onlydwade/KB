@@ -1,0 +1,48 @@
+# auditsystem-ansible/roles/mysql/tasks/main.yml
+---
+- name: "Install MySQL server and client packages"
+  ansible.builtin.apt:
+    name:
+      - mysql-server
+      - mysql-client
+    state: present
+
+- name: "Ensure MySQL service is started and enabled at boot"
+  ansible.builtin.service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: "Set the root user password for localhost"
+  ansible.builtin.mysql_user:
+    name: root
+    host: localhost
+    password: "{{ mysql_root_password }}"
+    login_user: root
+    login_password: "" # Initial password is empty
+    check_implicit_admin: yes
+  ignore_errors: true # Ignore error if password is already set
+
+- name: "Create application databases"
+  community.mysql.mysql_db:
+    name: "{{ item }}"
+    state: present
+    encoding: utf8mb4
+    collation: utf8mb4_unicode_ci
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  loop:
+    - "{{ mysql_db_nacos }}"
+    - "{{ mysql_db_app }}"
+
+- name: "Create the application database user"
+  community.mysql.mysql_user:
+    name: "{{ mysql_user_app }}"
+    host: '%' # Allow connections from any host
+    password: "{{ mysql_password_app }}"
+    priv:
+      "{{ mysql_db_nacos }}.*:ALL"
+      "{{ mysql_db_app }}.*:ALL"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"

@@ -1,0 +1,28 @@
+# auditsystem-ansible/site.yml
+---
+# 此劇本為主要入口，會按照順序執行所有部署步驟。
+# 用於從一個乾淨的系統完整部署 AuditSystem。
+
+- name: Step 1 - Install System Base Environment and Dependencies
+  import_playbook: playbook-01-install-setup.yml
+
+- name: Step 2 - Check Java Environment Compatibility
+  import_playbook: playbook-02-check-java.yml
+
+- name: Step 3 - Setup Nacos Service and Configurations
+  import_playbook: playbook-03-setup-nacos.yml
+
+- name: Step 4 - Deploy Backend Microservices
+  import_playbook: playbook-04-deploy-backend.yml
+
+- name: Step 5 - Deploy Frontend Application
+  import_playbook: playbook-05-deploy-frontend.yml
+
+- name: Step 6 - Configure Nginx Reverse Proxy
+  import_playbook: playbook-06-configure-nginx.yml
+
+- name: Step 7 - Start All Services
+  import_playbook: manage-services.yml
+  vars:
+    # 傳遞變數給 manage-services.yml，執行 'started' 動作。
+    service_state: "started"

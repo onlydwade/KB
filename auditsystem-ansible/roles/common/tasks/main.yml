@@ -1,0 +1,43 @@
+# auditsystem-ansible/roles/common/tasks/main.yml
+---
+- name: "Update apt cache and upgrade all packages to the latest version"
+  ansible.builtin.apt:
+    update_cache: yes
+    upgrade: dist
+    cache_valid_time: 3600 # Cache is valid for one hour
+
+- name: "Install common essential packages"
+  ansible.builtin.apt:
+    name:
+      - curl
+      - wget
+      - git
+      - unzip
+      - software-properties-common
+      - apt-transport-https
+      - ca-certificates
+      - gnupg
+      - lsb-release
+      - coreutils
+      - findutils
+      - util-linux
+    state: present
+
+- name: "Create application base directory structure"
+  ansible.builtin.file:
+    path: "{{ app_base_dir }}/{{ item }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0755'
+  loop:
+    - backend
+    - frontend
+    - logs
+    - uploads
+
+- name: "Create systemd service files directory"
+  ansible.builtin.file:
+    path: /etc/systemd/system
+    state: directory
+    mode: '0755'

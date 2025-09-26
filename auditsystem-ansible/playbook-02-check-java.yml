@@ -1,0 +1,22 @@
+# auditsystem-ansible/playbook-02-check-java.yml
+---
+# 這個劇本對應您的 check-java-compatibility.sh。
+# 它會驗證 Java 版本是否正確。
+
+- name: Playbook 02 - Check Java Environment Compatibility
+  hosts: auditsystem_servers
+  become: yes
+  tasks:
+    - name: Get current Java version
+      ansible.builtin.command: java -version
+      register: java_version_output
+      changed_when: false
+
+    - name: Display Java version info for debugging
+      ansible.builtin.debug:
+        var: java_version_output.stderr
+
+    - name: Assert that Java version is 11
+      ansible.builtin.fail:
+        msg: "Java version is not 11. Please run playbook-01-install-setup.yml first to install the correct version."
+      when: "'openjdk version \"11.' not in java_version_output.stderr"

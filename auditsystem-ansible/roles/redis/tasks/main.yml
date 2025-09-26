@@ -1,0 +1,12 @@
+# auditsystem-ansible/roles/redis/tasks/main.yml
+---
+- name: "Install Redis server"
+  ansible.builtin.apt:
+    name: redis-server
+    state: present
+
+- name: "Ensure Redis service is started and enabled at boot"
+  ansible.builtin.service:
+    name: redis-server
+    state: started
+    enabled: yes

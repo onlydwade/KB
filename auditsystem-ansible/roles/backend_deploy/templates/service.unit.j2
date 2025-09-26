@@ -1,0 +1,19 @@
+# auditsystem-ansible/roles/backend_deploy/templates/service.unit.j2
+[Unit]
+Description=AuditSystem {{ item.name | capitalize }} Service
+After=network.target nacos.service mysql.service redis-server.service
+
+[Service]
+Type=simple
+User={{ app_user }}
+Group={{ app_user }}
+WorkingDirectory={{ app_base_dir }}/backend/services/{{ item.name }}
+ExecStart={{ java_home_path }}/bin/java -Xms256m -Xmx512m -jar {{ item.jar_name }}
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=auditsystem-{{ item.name }}
+
+[Install]
+WantedBy=multi-user.target

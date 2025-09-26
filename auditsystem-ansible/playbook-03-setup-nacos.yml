@@ -1,0 +1,10 @@
+# auditsystem-ansible/playbook-03-setup-nacos.yml
+---
+# 這個劇本對應您的 setup-nacos.sh。
+# 它會呼叫 nacos_setup 角色來完成所有相關設定。
+
+- name: Playbook 03 - Setup Nacos Service and Configurations
+  hosts: auditsystem_servers
+  become: yes
+  roles:
+    - nacos_setup

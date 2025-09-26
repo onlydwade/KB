@@ -1,0 +1,25 @@
+# auditsystem-ansible/roles/nodejs/tasks/main.yml
+---
+- name: "Add Node.js 18.x apt key"
+  ansible.builtin.get_url:
+    url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+    dest: /etc/apt/keyrings/nodesource.asc
+    mode: '0644'
+    force: true
+
+- name: "Add NodeSource repository for Node.js 18.x"
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/nodesource.asc] https://deb.nodesource.com/node_18.x nodistro main"
+    state: present
+    update_cache: yes
+
+- name: "Install Node.js"
+  ansible.builtin.apt:
+    name: nodejs
+    state: present
+
+- name: "Install pnpm globally using npm"
+  ansible.builtin.npm:
+    name: pnpm
+    global: yes
+    state: present

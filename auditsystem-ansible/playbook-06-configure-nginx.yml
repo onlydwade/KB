@@ -1,0 +1,11 @@
+# auditsystem-ansible/playbook-06-configure-nginx.yml
+---
+# 這個劇本對應您的 configure-nginx.sh。
+
+- name: Playbook 06 - Configure Nginx Reverse Proxy
+  hosts: auditsystem_servers
+  become: yes
+  roles:
+    - role: nginx
+      # 使用 tag 來確保只執行 nginx role 中標記為 'configure' 的任務。
+      tags: ['configure']
