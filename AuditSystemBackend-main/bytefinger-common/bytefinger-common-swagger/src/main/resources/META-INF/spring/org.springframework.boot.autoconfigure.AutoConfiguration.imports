@@ -1,3 +1,0 @@
-com.bytefinger.common.swagger.config.SwaggerAutoConfiguration
-com.bytefinger.common.swagger.config.SwaggerWebConfiguration
-com.bytefinger.common.swagger.config.SwaggerBeanPostProcessor

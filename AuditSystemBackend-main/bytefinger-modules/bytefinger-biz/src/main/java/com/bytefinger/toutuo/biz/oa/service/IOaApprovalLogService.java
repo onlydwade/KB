@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.oa.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.biz.oa.domain.OaApprovalLog;/** * <p> * 发起OA审批 服务类 * </p> * * @author Jone * @since 2023-02-22 */public interface IOaApprovalLogService extends IService<OaApprovalLog> {}

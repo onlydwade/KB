@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.project.mapper;import com.baomidou.mybatisplus.core.mapper.BaseMapper;import com.bytefinger.toutuo.biz.project.domain.ProjectPool;import org.apache.ibatis.annotations.Mapper;/** * <p> * 项目池 Mapper 接口 * </p> * * @author Jone * @since 2023-02-01 */@Mapperpublic interface ProjectPoolMapper extends BaseMapper<ProjectPool> {}

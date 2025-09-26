@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.performance.domain.template;import lombok.Data;/** * 预算支出 * * @author pat * @date 2022/12/02 17:54 **/@Datapublic class BudgetOutRulesFormulaFieldTemplate {    private String name;    private String type;}

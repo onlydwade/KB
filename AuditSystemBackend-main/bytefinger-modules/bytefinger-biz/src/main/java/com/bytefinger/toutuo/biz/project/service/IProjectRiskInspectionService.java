@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.project.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.biz.project.domain.ProjectRiskInspection;/** * <p> * 项目-风险检查 服务类 * </p> * * @author Jone * @since 2023-02-01 */public interface IProjectRiskInspectionService extends IService<ProjectRiskInspection> {    void sendNotifyTask();}

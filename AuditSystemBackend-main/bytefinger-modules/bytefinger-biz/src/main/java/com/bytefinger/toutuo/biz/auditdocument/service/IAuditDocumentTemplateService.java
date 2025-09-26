@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.auditdocument.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.biz.auditdocument.domain.AuditDocumentTemplate;/** * <p> * 文件模板 服务类 * </p> * * @author Jone * @since 2023-01-31 */public interface IAuditDocumentTemplateService extends IService<AuditDocumentTemplate> {}

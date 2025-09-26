@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.auditteam.mapper;import com.bytefinger.toutuo.biz.auditteam.domain.AuditTeam;import com.baomidou.mybatisplus.core.mapper.BaseMapper;import org.apache.ibatis.annotations.Mapper;/** * <p> * 审计团队信息 Mapper 接口 * </p> * * @author Jone * @since 2025-08-05 */@Mapperpublic interface AuditTeamMapper extends BaseMapper<AuditTeam> {}

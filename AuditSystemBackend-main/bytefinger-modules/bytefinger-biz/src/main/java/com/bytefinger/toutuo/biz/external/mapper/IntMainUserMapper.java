@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.external.mapper;import com.bytefinger.toutuo.biz.external.domain.IntMainUser;import com.baomidou.mybatisplus.core.mapper.BaseMapper;import org.apache.ibatis.annotations.Mapper;/** * <p> * 主数据人员表 Mapper 接口 * </p> * * @author Jone * @since 2023-02-13 */@Mapperpublic interface IntMainUserMapper extends BaseMapper<IntMainUser> {}
