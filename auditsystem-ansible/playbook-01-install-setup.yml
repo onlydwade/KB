@@ -1,0 +1,18 @@
+# auditsystem-ansible/playbook-01-install-setup.yml
+---
+# 這個劇本對應您的 install-ubuntu-setup.sh。
+# 它會呼叫多個角色來安裝所有基礎設施依賴。
+
+- name: Playbook 01 - Install System Base Environment and Dependencies
+  hosts: auditsystem_servers
+  become: yes
+  roles:
+    - common
+    - java
+    - mysql
+    - redis
+    - rabbitmq
+    - nodejs
+    - role: nginx
+      # 使用 tag 來確保只執行 nginx role 中標記為 'install' 的任務。
+      tags: ['install']

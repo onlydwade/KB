@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.external.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.api.biz.user.domain.IntMainBm;/** * <p> * 主数据部门表 服务类 * </p> * * @author Jone * @since 2023-03-02 */public interface IIntMainBmService extends IService<IntMainBm> {}

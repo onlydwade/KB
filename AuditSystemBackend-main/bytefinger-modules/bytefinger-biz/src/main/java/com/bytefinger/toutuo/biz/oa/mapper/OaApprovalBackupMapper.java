@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.oa.mapper;import com.baomidou.mybatisplus.core.mapper.BaseMapper;import com.bytefinger.toutuo.biz.oa.domain.OaApprovalBackup;import org.apache.ibatis.annotations.Mapper;/** * <p> * 发起OA审批 Mapper 接口 * </p> * * @author Jone * @since 2023-02-16 */@Mapperpublic interface OaApprovalBackupMapper extends BaseMapper<OaApprovalBackup> {}

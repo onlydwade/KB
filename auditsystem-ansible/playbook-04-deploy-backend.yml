@@ -1,0 +1,9 @@
+# auditsystem-ansible/playbook-04-deploy-backend.yml
+---
+# 這個劇本對應您的 deploy-backend.sh。
+
+- name: Playbook 04 - Deploy Backend Microservices
+  hosts: auditsystem_servers
+  become: yes
+  roles:
+    - backend_deploy

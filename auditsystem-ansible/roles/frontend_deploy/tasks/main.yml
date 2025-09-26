@@ -1,0 +1,47 @@
+# auditsystem-ansible/roles/frontend_deploy/tasks/main.yml
+---
+- name: "Clone the frontend source code repository"
+  ansible.builtin.git:
+    repo: "{{ frontend_repo_url }}"
+    dest: "{{ app_base_dir }}/AuditSystemFrontend"
+    version: "{{ frontend_repo_branch }}"
+    force: yes
+  become_user: "{{ app_user }}"
+
+- name: "Install frontend dependencies with npm"
+  community.general.npm:
+    path: "{{ app_base_dir }}/AuditSystemFrontend"
+  become_user: "{{ app_user }}"
+
+- name: "Build the frontend application"
+  ansible.builtin.command:
+    cmd: "npm run build"
+    chdir: "{{ app_base_dir }}/AuditSystemFrontend"
+  environment:
+    NODE_OPTIONS: "--max-old-space-size=4096"
+  become_user: "{{ app_user }}"
+  register: npm_build
+  changed_when: "'Build complete' in npm_build.stdout"
+
+- name: "Ensure Nginx web root directory exists"
+  ansible.builtin.file:
+    path: "{{ frontend_web_root }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: "Deploy built frontend files to Nginx web root"
+  ansible.posix.synchronize:
+    src: "{{ app_base_dir }}/AuditSystemFrontend/dist/"
+    dest: "{{ frontend_web_root }}/"
+    delete: yes
+    recursive: yes
+  become: yes
+
+- name: "Ensure correct ownership and permissions on web root"
+  ansible.builtin.file:
+    path: "{{ frontend_web_root }}"
+    owner: www-data
+    group: www-data
+    recurse: yes

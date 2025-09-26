@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.project.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.biz.project.domain.ProjectTeamOutside;/** * <p> * 项目团队信息(外部人员) 服务类 * </p> * * @author xiao * @since 2023-05-10 */public interface IProjectTeamOutsideService extends IService<ProjectTeamOutside> {}

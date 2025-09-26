@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.audittopic.service;import com.bytefinger.toutuo.biz.audittopic.domain.AuditTopic;import com.baomidou.mybatisplus.extension.service.IService;/** * <p> * 话题表 服务类 * </p> * * @author Jone * @since 2025-08-27 */public interface IAuditTopicService extends IService<AuditTopic> {}

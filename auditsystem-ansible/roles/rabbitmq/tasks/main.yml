@@ -1,0 +1,53 @@
+# auditsystem-ansible/roles/rabbitmq/tasks/main.yml
+---
+- name: "Install Erlang and related packages for RabbitMQ"
+  ansible.builtin.apt:
+    name:
+      - erlang-base
+      - erlang-crypto
+      - erlang-eldap
+      - erlang-inets
+      - erlang-os-mon
+      - erlang-public-key
+      - erlang-ssl
+    state: present
+
+- name: "Install RabbitMQ server"
+  ansible.builtin.apt:
+    name: rabbitmq-server
+    state: present
+
+- name: "Ensure RabbitMQ service is started and enabled at boot"
+  ansible.builtin.service:
+    name: rabbitmq-server
+    state: started
+    enabled: yes
+
+- name: "Enable RabbitMQ management plugin"
+  community.rabbitmq.rabbitmq_plugin:
+    names: rabbitmq_management
+    state: enabled
+  notify:
+    - "Restart rabbitmq-server"
+
+- name: "Create RabbitMQ virtual host for the application"
+  community.rabbitmq.rabbitmq_vhost:
+    name: "{{ rabbitmq_vhost }}"
+    state: present
+
+- name: "Create RabbitMQ user for the application"
+  community.rabbitmq.rabbitmq_user:
+    user: "{{ rabbitmq_user }}"
+    password: "{{ rabbitmq_password }}"
+    vhost: "{{ rabbitmq_vhost }}"
+    permissions:
+      - .*
+      - .*
+      - .*
+    state: present
+
+  handlers:
+    - name: "Restart rabbitmq-server"
+      ansible.builtin.service:
+        name: rabbitmq-server
+        state: restarted

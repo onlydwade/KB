@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.project.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.biz.project.domain.ProjectBid;/** * <p> * 项目文件 服务类 * </p> * * @author Jone * @since 2023-01-31 */public interface IProjectBidService extends IService<ProjectBid> {}

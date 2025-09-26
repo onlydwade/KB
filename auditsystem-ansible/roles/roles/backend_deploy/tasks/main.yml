@@ -1,0 +1,74 @@
+# auditsystem-ansible/roles/backend_deploy/tasks/main.yml
+---
+- name: "Clone the backend source code repository"
+  ansible.builtin.git:
+    repo: "{{ backend_repo_url }}"
+    dest: "{{ app_base_dir }}/AuditSystemBackend"
+    version: main
+    force: yes
+  become_user: "{{ app_user }}"
+
+- name: "Build the backend project with Maven"
+  ansible.builtin.command:
+    cmd: "mvn clean package -DskipTests"
+    chdir: "{{ app_base_dir }}/AuditSystemBackend"
+  become_user: "{{ app_user }}"
+  # 註冊結果，以便我們知道是否有變更
+  register: maven_build
+  changed_when: "'BUILD SUCCESS' in maven_build.stdout"
+
+- name: "Create directories for backend services and logs"
+  ansible.builtin.file:
+    path: "{{ app_base_dir }}/{{ item.type }}/{{ item.service.name }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0755'
+  loop:
+    - { type: 'backend/services', service: "{{ backend_services | community.general.json_query('[*]') }}" }
+    - { type: 'logs', service: "{{ backend_services | community.general.json_query('[*]') }}" }
+  loop_control:
+    loop_var: item
+    label: "{{ item.type }}/{{ item.service.name }}"
+  # 展開迴圈，對每個服務執行
+  with_subelements:
+    - "{{ [{'type': 'backend/services'}, {'type': 'logs'}] }}"
+    - backend_services
+
+- name: "Copy the built JAR files to their deployment directories"
+  ansible.builtin.copy:
+    src: "{{ app_base_dir }}/AuditSystemBackend/{{ item.source_path }}/{{ item.jar_name }}"
+    dest: "{{ app_base_dir }}/backend/services/{{ item.name }}/{{ item.jar_name }}"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0644'
+    remote_src: yes
+  loop: "{{ backend_services }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: "Create systemd service files for each microservice"
+  ansible.builtin.template:
+    src: service.unit.j2
+    dest: "/etc/systemd/system/auditsystem-{{ item.name }}.service"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ backend_services }}"
+  loop_control:
+    label: "{{ item.name }}"
+  notify:
+    - "Daemon reload"
+
+- name: "Enable all backend microservices"
+  ansible.builtin.systemd:
+    name: "auditsystem-{{ item.name }}"
+    enabled: yes
+  loop: "{{ backend_services }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+  handlers:
+    - name: "Daemon reload"
+      ansible.builtin.systemd:
+        daemon_reload: yes

@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.project.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.biz.project.domain.ProjectManagementIndicators;/** * <p> * 项目经营指标 服务类 * </p> * * @author Jone * @since 2023-01-31 */public interface IProjectManagementIndicatorsService extends IService<ProjectManagementIndicators> {}

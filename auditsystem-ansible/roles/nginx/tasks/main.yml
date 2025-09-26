@@ -1,0 +1,55 @@
+# auditsystem-ansible/roles/nginx/tasks/main.yml
+---
+- name: "Install Nginx package"
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+  tags:
+    - install
+
+- name: "Ensure Nginx service is enabled"
+  ansible.builtin.service:
+    name: nginx
+    enabled: yes
+  tags:
+    - install
+    - configure
+
+- name: "Remove the default Nginx site configuration"
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: "Reload nginx"
+  tags:
+    - configure
+
+- name: "Create AuditSystem site configuration from template"
+  ansible.builtin.template:
+    src: nginx-site.conf.j2
+    dest: /etc/nginx/sites-available/auditsystem
+    owner: root
+    group: root
+    mode: '0644'
+  notify: "Reload nginx"
+  tags:
+    - configure
+
+- name: "Enable the new AuditSystem site by creating a symlink"
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/auditsystem
+    dest: /etc/nginx/sites-enabled/auditsystem
+    state: link
+  notify: "Reload nginx"
+  tags:
+    - configure
+
+  handlers:
+    - name: "Reload nginx"
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded
+
+    - name: "Restart nginx"
+      ansible.builtin.service:
+        name: nginx
+        state: restarted

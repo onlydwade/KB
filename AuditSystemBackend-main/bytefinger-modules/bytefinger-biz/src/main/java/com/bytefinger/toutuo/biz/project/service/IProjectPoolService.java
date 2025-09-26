@@ -1,1 +1,0 @@
-package com.bytefinger.toutuo.biz.project.service;import com.baomidou.mybatisplus.extension.service.IService;import com.bytefinger.toutuo.biz.project.domain.ProjectPool;/** * <p> * 项目池 服务类 * </p> * * @author Jone * @since 2023-02-01 */public interface IProjectPoolService extends IService<ProjectPool> {}

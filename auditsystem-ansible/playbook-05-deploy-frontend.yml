@@ -1,0 +1,9 @@
+# auditsystem-ansible/playbook-05-deploy-frontend.yml
+---
+# 這個劇本對應您的 deploy-frontend.sh。
+
+- name: Playbook 05 - Deploy Frontend Application
+  hosts: auditsystem_servers
+  become: yes
+  roles:
+    - frontend_deploy

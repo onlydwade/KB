@@ -1,0 +1,100 @@
+# auditsystem-ansible/roles/nacos_setup/tasks/main.yml
+---
+- name: "Download and unarchive Nacos server"
+  ansible.builtin.unarchive:
+    src: "{{ nacos_download_url }}"
+    dest: "{{ app_base_dir }}"
+    remote_src: yes
+    creates: "{{ nacos_install_dir }}" # 如果目錄已存在，則不執行此任務
+
+- name: "Ensure Nacos log directories exist"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0755'
+  loop:
+    - /logs/access_log
+
+- name: "Configure Nacos application.properties to use MySQL"
+  ansible.builtin.template:
+    src: application.properties.j2
+    dest: "{{ nacos_install_dir }}/conf/application.properties"
+    owner: "{{ app_user }}"
+    group: "{{ app_user }}"
+    mode: '0644'
+  notify: "Restart nacos service"
+
+- name: "Import Nacos database schema into MySQL"
+  community.mysql.mysql_db:
+    name: "{{ mysql_db_nacos }}"
+    state: import
+    target: "{{ nacos_install_dir }}/conf/nacos-mysql.sql"
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  # `run_once: true` 確保即使有多台主機，這個 SQL 也只會被匯入一次
+  run_once: true
+
+- name: "Create systemd service file for Nacos"
+  ansible.builtin.template:
+    src: nacos.service.j2
+    dest: /etc/systemd/system/nacos.service
+    owner: root
+    group: root
+    mode: '0644'
+  notify:
+    - "Daemon reload"
+    - "Restart nacos service"
+
+- name: "Ensure Nacos service is started and enabled"
+  ansible.builtin.service:
+    name: nacos
+    state: started
+    enabled: yes
+
+- name: "Wait for Nacos to be fully started"
+  ansible.builtin.uri:
+    url: "http://{{ nacos_server_addr }}/nacos"
+    status_code: 200
+  register: result
+  until: result.status == 200
+  retries: 30
+  delay: 5
+
+- name: "Publish shared configurations to Nacos"
+  community.general.nacos_config:
+    server_addr: "{{ nacos_server_addr }}"
+    data_id: "application-local.yml"
+    group: "DEFAULT_GROUP"
+    content: "{{ lookup('template', 'nacos-config/shared/application-local.yml.j2') }}"
+    namespace: "{{ nacos_namespace }}"
+    username: "{{ nacos_console_user }}"
+    password: "{{ nacos_console_password }}"
+
+- name: "Publish service-specific configurations to Nacos"
+  community.general.nacos_config:
+    server_addr: "{{ nacos_server_addr }}"
+    data_id: "{{ item }}.yml"
+    group: "{{ nacos_namespace }}"
+    content: "{{ lookup('template', 'nacos-config/services/' + item + '.yml.j2') }}"
+    namespace: "{{ nacos_namespace }}"
+    username: "{{ nacos_console_user }}"
+    password: "{{ nacos_console_password }}"
+  loop:
+    - bytefinger-auth
+    - bytefinger-biz
+    - bytefinger-gateway
+    - bytefinger-job
+    - bytefinger-report
+    - bytefinger-system
+
+  handlers:
+    - name: "Restart nacos service"
+      ansible.builtin.service:
+        name: nacos
+        state: restarted
+
+    - name: "Daemon reload"
+      ansible.builtin.systemd:
+        daemon_reload: yes

@@ -1,7 +1,0 @@
-alter table biz_project MODIFY COLUMN discounts_desc text(0)  COMMENT '优惠承诺';
-alter table biz_project MODIFY COLUMN service_desc text(0)  COMMENT '服务承诺';
-alter table biz_project MODIFY COLUMN main_clause text(0)  COMMENT '主要条款';
-alter table biz_project MODIFY COLUMN risk_warning text(0)  COMMENT '其他风险提示';
-alter table biz_project MODIFY COLUMN other_desc text(0)  COMMENT '其他补充';
-alter table biz_project Add column relevance_project_id bigint(21) COMMENT '关联拓后跳转项目id';
-
